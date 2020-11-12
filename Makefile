@@ -1,4 +1,3 @@
-  
 run-build:
 	npm run bundle:prepare
 	npm run bundle:ts
