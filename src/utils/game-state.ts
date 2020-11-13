@@ -7,6 +7,14 @@ const readNextLine = (): string => {
     return readline();
 };
 
+export const getPlayerIds = (gameState: GameState): string[] => {
+    return Object.keys(gameState.players).sort();
+};
+
+export const getPossibleActionIds = (gameState: GameState): string[] => {
+    return Object.keys(gameState.possibleActions);
+};
+
 export const readGameStateFromGameLoopTick = (): GameState => {
     const gameState: GameState = {
         players: {},
@@ -52,27 +60,39 @@ export const readGameStateFromGameLoopTick = (): GameState => {
     return gameState;
 };
 
-export const cloneGameState = (gameState: GameState): GameState => {
+export const cloneGameState = ({
+    gameState,
+    playerActionIdsToIgnore,
+}: {
+    gameState: GameState;
+    playerActionIdsToIgnore?: string[];
+}): GameState => {
     const clonedState: GameState = {
         players: {},
         possibleActions: {},
     };
 
-    const playerIds = Object.keys(gameState.players);
+    const playerIds = getPlayerIds(gameState);
 
-    for (let i = 0, iMax = playerIds.length; i < iMax; i++) {
-        const playerId = playerIds[i];
-        const player = gameState.players[i];
+    playerIds.forEach(playerId => {
+        const player = gameState.players[playerId];
         clonedState.players[playerId] = {
             ingredients: [...player.ingredients],
             score: player.score,
         };
-    }
+    });
 
-    const actionIds = Object.keys(gameState.possibleActions);
+    const actionIds = getPossibleActionIds(gameState);
+    const playerActionIdsToIgnoreMap: { [index: string]: true } = {};
 
-    for (let i = 0, iMax = actionIds.length; i < iMax; i++) {
-        const actionId = actionIds[i];
+    (playerActionIdsToIgnore || []).forEach(playerActionId => {
+        playerActionIdsToIgnoreMap[playerActionId] = true;
+    });
+
+    actionIds.forEach(actionId => {
+        if (playerActionIdsToIgnoreMap[actionId] === true) {
+            return;
+        }
         const action = gameState.possibleActions[actionId];
         clonedState.possibleActions[actionId] = {
             id: action.id,
@@ -84,7 +104,7 @@ export const cloneGameState = (gameState: GameState): GameState => {
             castable: action.castable,
             repeatable: action.repeatable,
         };
-    }
+    });
 
     return clonedState;
 };

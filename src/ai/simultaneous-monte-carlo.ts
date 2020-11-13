@@ -32,33 +32,49 @@ export type StateCloner<TState> = (state: TState) => TState;
 
 export type OpponentIdGetter = (playerId: string) => string;
 
-class MCNode<TState, TAction> {
-    parent: MCNode<TState, TAction> | null;
-    children: MCNode<TState, TAction>[];
+export type ValidPlayerActionsGetter<TState> = ({
+    gameState,
+    playerId,
+    removeTakenActionFromPool,
+}: {
+    gameState: TState;
+    playerId: string;
+    removeTakenActionFromPool: boolean;
+}) => { playerActionId: string; newGameState: TState }[];
+
+class MCNode<TState> {
+    parent: MCNode<TState> | null;
+    children: MCNode<TState>[];
     visitCount: number;
     valueSum: number;
-    action: null | TAction;
-    state: TState;
-    playerId: string;
+    playerActionId: null | string;
+    gameState: TState;
+    playerIds: string[];
+    activePlayerIndex: number;
+    playerScores: number[];
 
     constructor({
         parent,
-        action,
-        state,
-        playerId,
+        playerActionId,
+        gameState,
+        playerIds,
+        activePlayerIndex,
     }: {
-        parent: MCNode<TState, TAction> | null;
-        action: TAction | null;
-        state: TState;
-        playerId: string;
+        parent: MCNode<TState> | null;
+        playerActionId: string | null;
+        gameState: TState;
+        playerIds: string[];
+        activePlayerIndex: number;
     }) {
         this.parent = parent;
         this.children = [];
         this.visitCount = 0;
         this.valueSum = 0;
-        this.action = action;
-        this.state = state;
-        this.playerId = playerId;
+        this.playerActionId = playerActionId;
+        this.gameState = gameState;
+        this.playerIds = playerIds;
+        this.activePlayerIndex = activePlayerIndex;
+        this.playerScores = new Array(this.playerIds.length).fill(null).map(() => 0);
     }
 
     getValue(): number {
@@ -76,26 +92,40 @@ class MCNode<TState, TAction> {
         return this.visitCount > 0;
     }
 
-    applyLeafNodes(
-        availableActions: TAction[],
-        applyPlayerActionToState: PlayerActionToStateApplier<TState, TAction>,
-        getOpponentId: OpponentIdGetter
-    ): void {
-        this.children = availableActions.map(availableAction => {
+    applyLeafNodes({
+        getValidPlayerActions,
+    }: {
+        getValidPlayerActions: ValidPlayerActionsGetter<TState>;
+    }): void {
+        const playerId = this.playerIds[this.activePlayerIndex];
+        const validPlayerActions = getValidPlayerActions({
+            gameState: this.gameState,
+            playerId,
+            removeTakenActionFromPool: !this.isFirstPlayer(),
+        });
+        const nextActivePlayerIndex = this.getNextActivePlayerIndex();
+        this.children = validPlayerActions.map(({ playerActionId, newGameState }) => {
             return new MCNode({
                 parent: this,
-                action: availableAction,
-                state: applyPlayerActionToState({
-                    state: this.state,
-                    action: availableAction,
-                    playerId: this.playerId,
-                }),
-                playerId: getOpponentId(this.playerId),
+                playerActionId,
+                gameState: newGameState,
+                playerIds: this.playerIds,
+                activePlayerIndex: nextActivePlayerIndex,
             });
         });
     }
 
-    getMaxUCBNode(cConst: number): MCNode<TState, TAction> {
+    isFirstPlayer(): boolean {
+        return this.activePlayerIndex === 0;
+    }
+
+    getNextActivePlayerIndex(): number {
+        return this.playerIds[this.activePlayerIndex + 1] === undefined
+            ? 0
+            : this.activePlayerIndex + 1;
+    }
+
+    getMaxUCBNode(cConst: number): MCNode<TState> {
         let chosenNodeIndex = -1;
         let chosenNodeVale = -1;
 
@@ -116,7 +146,7 @@ class MCNode<TState, TAction> {
     }
 }
 
-class MCSearch<TState, TAction> {
+class SimultaneousMCSearch<TState, TAction> {
     rootNode: MCNode<TState, TAction>;
     numOfMaxIterations: number;
     maxTimetoSpend: number;
@@ -127,7 +157,7 @@ class MCSearch<TState, TAction> {
     scoreState: StateScorer<TState>;
     checkIfTerminalState: TerminalStateChecker<TState>;
     cloneState: StateCloner<TState>;
-    getOpponentId: OpponentIdGetter;
+    getValidPlayerActions: ValidPlayerActionsGetter<TState>;
 
     constructor({
         startState,
@@ -136,12 +166,12 @@ class MCSearch<TState, TAction> {
         availableActions,
         cConst,
         maxRolloutSteps,
-        initialPlayerId,
+        playerIds,
         applyPlayerActionToState,
         scoreState,
         checkIfTerminalState,
         cloneState,
-        getOpponentId,
+        getValidPlayerActions,
     }: {
         startState: TState;
         numOfMaxIterations: number;
@@ -149,12 +179,13 @@ class MCSearch<TState, TAction> {
         availableActions: TAction[];
         cConst: number;
         maxRolloutSteps: number;
-        initialPlayerId: string;
+        playerIds: string[];
         applyPlayerActionToState: PlayerActionToStateApplier<TState, TAction>;
         scoreState: StateScorer<TState>;
         checkIfTerminalState: TerminalStateChecker<TState>;
         cloneState: StateCloner<TState>;
         getOpponentId: OpponentIdGetter;
+        getValidPlayerActions: ValidPlayerActionsGetter<TState>;
     }) {
         this.numOfMaxIterations = numOfMaxIterations;
         this.maxTimetoSpend = maxTimetoSpend;
@@ -165,18 +196,15 @@ class MCSearch<TState, TAction> {
         this.scoreState = scoreState;
         this.checkIfTerminalState = checkIfTerminalState;
         this.cloneState = cloneState;
-        this.getOpponentId = getOpponentId;
+        this.getValidPlayerActions = getValidPlayerActions;
         this.rootNode = new MCNode<TState, TAction>({
             parent: null,
             state: startState,
             action: null,
-            playerId: initialPlayerId,
+            playerIds,
+            activePlayerIndex: 0,
         });
-        this.rootNode.applyLeafNodes(
-            this.availableActions,
-            this.applyPlayerActionToState,
-            this.getOpponentId
-        );
+        this.rootNode.applyLeafNodes(this.availableActions, this.applyPlayerActionToState);
     }
 
     traverse(startFromNode: MCNode<TState, TAction>): MCNode<TState, TAction> {
@@ -250,11 +278,7 @@ class MCSearch<TState, TAction> {
             let currentNode = this.traverse(this.rootNode);
 
             if (currentNode.hasBeenVisited()) {
-                currentNode.applyLeafNodes(
-                    this.availableActions,
-                    this.applyPlayerActionToState,
-                    this.getOpponentId
-                );
+                currentNode.applyLeafNodes(this.availableActions, this.applyPlayerActionToState);
                 currentNode = this.traverse(currentNode);
             }
 
@@ -271,4 +295,4 @@ class MCSearch<TState, TAction> {
     }
 }
 
-export default MCSearch;
+export default SimultaneousMCSearch;

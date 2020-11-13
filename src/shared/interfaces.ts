@@ -16,6 +16,11 @@ export interface PlayerAction {
     repeatable: boolean;
 }
 
+export interface ValidPlayerAction {
+    playerActionId: string;
+    newGameState: GameState;
+}
+
 export interface GameState {
     players: {
         [index: string]: PlayerState;
