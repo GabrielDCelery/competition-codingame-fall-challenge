@@ -18,11 +18,15 @@ export interface PlayerAction {
 }
 
 export interface GameState {
-    numOfRounds: number;
+    roundId: number;
     players: {
         [index: string]: PlayerState;
     };
-    possibleActions: {
+    availableActions: {
         [index: string]: PlayerAction;
+    };
+    cache: {
+        playerIds: string[];
+        avalableActionIds: string[];
     };
 }

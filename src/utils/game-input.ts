@@ -7,7 +7,7 @@ export const createActionForGameLoop = ({
     gameState: GameState;
     playerActionId: string;
 }): string => {
-    const playerAction = gameState.possibleActions[playerActionId];
+    const playerAction = gameState.availableActions[playerActionId];
     if (!playerAction) {
         throw new Error(`Not valid action id -> ${playerActionId}`);
     }

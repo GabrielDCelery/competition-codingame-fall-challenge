@@ -5,21 +5,21 @@ const applyBrewPlayerActionToGameState = ({
     gameState,
     playerAction,
     playerId,
-    removeTakenActionFromPool,
 }: {
     gameState: GameState;
     playerAction: PlayerAction;
     playerId: string;
-    removeTakenActionFromPool: boolean;
 }): GameState => {
-    const newIngredients: number[] = playerAction.deltas.map((delta, index) => {
+    const newGameState = cloneGameState({ gameState });
+    newGameState.players[playerId].numOfPotionsBrewed += 1;
+    const newPlayerIngredients = playerAction.deltas.map((delta, index) => {
         return gameState.players[playerId].ingredients[index] - delta;
     });
-    const newGameState = removeTakenActionFromPool
-        ? cloneGameState({ gameState, playerActionIdsToIgnore: [`${playerAction.id}`] })
-        : cloneGameState({ gameState });
-    newGameState.players[playerId].ingredients = newIngredients;
+    newGameState.players[playerId].ingredients = newPlayerIngredients;
     newGameState.players[playerId].score += playerAction.price;
+    newGameState.cache.avalableActionIds = newGameState.cache.avalableActionIds.filter(item => {
+        return item !== `${playerAction.id}`;
+    });
     return newGameState;
 };
 
@@ -29,23 +29,20 @@ const applyWaitPlayerActionToGameState = ({
     gameState: GameState;
     playerAction: PlayerAction;
     playerId: string;
-    removeTakenActionFromPool: boolean;
 }): GameState => {
-    return gameState;
+    return cloneGameState({ gameState });
 };
 
 export const applyPlayerActionToGameState = ({
     gameState,
     playerActionId,
     playerId,
-    removeTakenActionFromPool,
 }: {
     gameState: GameState;
     playerActionId: string;
     playerId: string;
-    removeTakenActionFromPool: boolean;
 }): GameState => {
-    const playerAction = gameState.possibleActions[playerActionId];
+    const playerAction = gameState.availableActions[playerActionId];
     if (!playerAction) {
         throw new Error(`Not valid action id -> ${playerActionId}`);
     }
@@ -56,7 +53,6 @@ export const applyPlayerActionToGameState = ({
                 gameState,
                 playerAction,
                 playerId,
-                removeTakenActionFromPool,
             });
         }
         case ActionType.WAIT: {
@@ -64,7 +60,6 @@ export const applyPlayerActionToGameState = ({
                 gameState,
                 playerAction,
                 playerId,
-                removeTakenActionFromPool,
             });
         }
         default:
@@ -72,4 +67,24 @@ export const applyPlayerActionToGameState = ({
     }
 };
 
-export const applyPlayerActionIdPairToGameState = 
+export const applyPlayerActionIdsToGameState = ({
+    gameState,
+    playerActionIds,
+}: {
+    gameState: GameState;
+    playerActionIds: string[];
+}): GameState => {
+    let newGameState = cloneGameState({ gameState });
+
+    playerActionIds.forEach((playerActionId, index) => {
+        newGameState = applyPlayerActionToGameState({
+            gameState: newGameState,
+            playerActionId,
+            playerId: gameState.cache.playerIds[index],
+        });
+    });
+
+    newGameState.roundId += 1;
+
+    return newGameState;
+};

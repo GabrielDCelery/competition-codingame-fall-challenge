@@ -1,44 +1,40 @@
 import { GameState } from '../shared';
 import {
-    getValidPlayerActionIds,
-    applyPlayerActionToGameState,
-    getPlayerIds,
+    applyPlayerActionIdsToGameState,
     checkIfTerminalState,
+    getValidPlayerActionIdPairsForTurn,
+    cloneGameState,
 } from '../utils';
 import MonteCarlo, {
-    ValidPlayerActionIdsGetter,
-    PlayerActionToGameStateApplier,
+    ValidPlayerActionIdPairsGetter,
+    PlayerActionsToGameStateApplier,
     OutcomeValuesGetter,
     TerminalStateChecker,
+    GameStateCloner,
 } from './simultaneous-monte-carlo';
 
-const mcGetValidPlayerActionIds: ValidPlayerActionIdsGetter<GameState> = ({
+const mcGetValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<GameState> = ({
     gameState,
-    playerId,
 }) => {
-    return getValidPlayerActionIds({ gameState, playerId });
+    return getValidPlayerActionIdPairsForTurn({ gameState });
 };
 
-const mcApplyPlayerActionToGameState: PlayerActionToGameStateApplier<GameState> = ({
+const mcApplyPlayerActionsToGameState: PlayerActionsToGameStateApplier<GameState> = ({
     gameState,
-    playerActionId,
-    playerId,
-    removeTakenActionFromPool,
+    playerActionIds,
 }) => {
-    return applyPlayerActionToGameState({
+    return applyPlayerActionIdsToGameState({
         gameState,
-        playerActionId,
-        playerId,
-        removeTakenActionFromPool,
+        playerActionIds,
     });
 };
 
 const mcGetOutcomeValues: OutcomeValuesGetter<GameState> = ({ terminalState }) => {
-    const playerIds = getPlayerIds(terminalState);
+    const playerIds = terminalState.cache.playerIds;
     const scores = playerIds.map(playerId => terminalState.players[playerId].score);
 
     if (scores[0] === scores[1]) {
-        return [0, 5, 0.5];
+        return [0.5, 0.5];
     }
 
     if (scores[0] > scores[1]) {
@@ -49,21 +45,17 @@ const mcGetOutcomeValues: OutcomeValuesGetter<GameState> = ({ terminalState }) =
 };
 
 const mcCheckIfTerminalState: TerminalStateChecker<GameState> = ({
-    activePlayerChoseTheSameAction,
-    activePlayerId,
     initialState,
-    prevState,
     currentState,
 }) => {
-    if (activePlayerChoseTheSameAction) {
-        return true;
-    }
     return checkIfTerminalState({
-        activePlayerId,
         initialState,
-        prevState,
         currentState,
     });
+};
+
+const mcCloneGameState: GameStateCloner<GameState> = ({ gameState }) => {
+    return cloneGameState({ gameState });
 };
 
 export const choosePlayerActionId = ({
@@ -74,17 +66,22 @@ export const choosePlayerActionId = ({
 }): string => {
     const mc = new MonteCarlo<GameState>({
         startState: gameState,
-        numOfMaxIterations: 100000,
-        maxTimetoSpend: 500,
-        maxRolloutSteps: 10,
-        cConst: Math.sqrt(2),
-        playerIds: getPlayerIds(gameState),
-        getValidPlayerActionIds: mcGetValidPlayerActionIds,
-        applyPlayerActionToGameState: mcApplyPlayerActionToGameState,
+        numOfMaxIterations: 100,
+        maxTimetoSpend: 100000,
+        maxRolloutSteps: 3,
+        cConst: 2,
+        getValidPlayerActionIdPairs: mcGetValidPlayerActionIdPairs,
+        applyPlayerActionsToGameState: mcApplyPlayerActionsToGameState,
         getOutcomeValues: mcGetOutcomeValues,
         checkIfTerminalState: mcCheckIfTerminalState,
+        cloneGameState: mcCloneGameState,
     });
     const chosenActionId = mc.run();
-    // console.log(mc.rootNode.children);
+    console.log('playerActionIds');
+    console.log(mc.rootNode.children.map(e => e.playerActionIds));
+    console.log('visitCount');
+    console.log(mc.rootNode.children.map(e => e.visitCount));
+    console.log('valueSums');
+    console.log(mc.rootNode.children.map(e => e.valueSums));
     return chosenActionId;
 };

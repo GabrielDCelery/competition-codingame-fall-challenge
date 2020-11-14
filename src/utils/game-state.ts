@@ -8,14 +8,6 @@ const readNextLine = (): string => {
     return readline();
 };
 
-export const getPlayerIds = (gameState: GameState): string[] => {
-    return Object.keys(gameState.players).sort();
-};
-
-export const getPossibleActionIds = (gameState: GameState): string[] => {
-    return Object.keys(gameState.possibleActions);
-};
-
 const createWaitAction = (): PlayerAction => {
     return {
         id: 999,
@@ -31,7 +23,7 @@ const createWaitAction = (): PlayerAction => {
 
 export const createInitialGameState = (): GameState => {
     const gameState: GameState = {
-        numOfRounds: 0,
+        roundId: 0,
         players: {
             [PLAYER_ID_ME]: {
                 numOfPotionsBrewed: 0,
@@ -44,7 +36,11 @@ export const createInitialGameState = (): GameState => {
                 score: 0,
             },
         },
-        possibleActions: {},
+        availableActions: {},
+        cache: {
+            playerIds: [PLAYER_ID_ME, PLAYER_ID_OPPONENT],
+            avalableActionIds: [],
+        },
     };
 
     return gameState;
@@ -52,9 +48,13 @@ export const createInitialGameState = (): GameState => {
 
 export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState => {
     const newGameState: GameState = {
-        numOfRounds: oldGameState.numOfRounds + 1,
+        roundId: oldGameState.roundId,
         players: {},
-        possibleActions: {},
+        availableActions: {},
+        cache: {
+            playerIds: [PLAYER_ID_ME, PLAYER_ID_OPPONENT],
+            avalableActionIds: [],
+        },
     };
 
     const actionCount = parseInt(readNextLine());
@@ -62,7 +62,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
     for (let i = 0; i < actionCount; i++) {
         const inputs = readNextLine().split(' ');
         const id = parseInt(inputs[0]);
-        newGameState.possibleActions[id] = {
+        newGameState.availableActions[id] = {
             id,
             type: inputs[1] as ActionType,
             deltas: [
@@ -77,11 +77,13 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
             castable: inputs[9] !== '0',
             repeatable: inputs[10] !== '0',
         };
+        newGameState.cache.avalableActionIds.push(`${id}`);
     }
 
     const waitAction = createWaitAction();
 
-    newGameState.possibleActions[waitAction.id] = waitAction;
+    newGameState.availableActions[waitAction.id] = waitAction;
+    newGameState.cache.avalableActionIds.push(`${waitAction.id}`);
 
     for (let i = 0; i < 2; i++) {
         const inputs = readNextLine().split(' ');
@@ -101,71 +103,18 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
     return newGameState;
 };
 
-/*
-export const readGameStateFromGameLoopTick = (): GameState => {
-    const gameState: GameState = {
-        numOfRounds: 0,
-        players: {},
-        possibleActions: {},
-    };
-
-    const actionCount = parseInt(readNextLine());
-
-    for (let i = 0; i < actionCount; i++) {
-        const inputs = readNextLine().split(' ');
-        const id = parseInt(inputs[0]);
-        gameState.possibleActions[id] = {
-            id,
-            type: inputs[1] as ActionType,
-            deltas: [
-                parseInt(inputs[2]),
-                parseInt(inputs[3]),
-                parseInt(inputs[4]),
-                parseInt(inputs[5]),
-            ],
-            price: parseInt(inputs[6]),
-            tomeIndex: parseInt(inputs[7]),
-            taxCount: parseInt(inputs[8]),
-            castable: inputs[9] !== '0',
-            repeatable: inputs[10] !== '0',
-        };
-    }
-
-    for (let i = 0; i < 2; i++) {
-        const inputs = readNextLine().split(' ');
-
-        gameState.players[i] = {
-            numOfPotionsBrewed: 0,
-            ingredients: [
-                parseInt(inputs[0]),
-                parseInt(inputs[1]),
-                parseInt(inputs[2]),
-                parseInt(inputs[3]),
-            ],
-            score: parseInt(inputs[4]),
-        };
-    }
-
-    return gameState;
-};
-*/
-
-export const cloneGameState = ({
-    gameState,
-    playerActionIdsToIgnore,
-}: {
-    gameState: GameState;
-    playerActionIdsToIgnore?: string[];
-}): GameState => {
+export const cloneGameState = ({ gameState }: { gameState: GameState }): GameState => {
     const clonedState: GameState = {
-        numOfRounds: gameState.numOfRounds,
+        roundId: gameState.roundId,
         players: {},
-        possibleActions: {},
+        availableActions: {},
+        cache: {
+            playerIds: [...gameState.cache.playerIds],
+            avalableActionIds: [...gameState.cache.avalableActionIds],
+        },
     };
 
-    const playerIds = getPlayerIds(gameState);
-
-    playerIds.forEach(playerId => {
+    gameState.cache.playerIds.forEach(playerId => {
         const player = gameState.players[playerId];
         clonedState.players[playerId] = {
             numOfPotionsBrewed: player.numOfPotionsBrewed,
@@ -174,29 +123,7 @@ export const cloneGameState = ({
         };
     });
 
-    const actionIds = getPossibleActionIds(gameState);
-    const playerActionIdsToIgnoreMap: { [index: string]: true } = {};
-
-    (playerActionIdsToIgnore || []).forEach(playerActionId => {
-        playerActionIdsToIgnoreMap[playerActionId] = true;
-    });
-
-    actionIds.forEach(actionId => {
-        if (playerActionIdsToIgnoreMap[actionId] === true) {
-            return;
-        }
-        const action = gameState.possibleActions[actionId];
-        clonedState.possibleActions[actionId] = {
-            id: action.id,
-            type: action.type,
-            deltas: [...action.deltas],
-            price: action.price,
-            tomeIndex: action.tomeIndex,
-            taxCount: action.taxCount,
-            castable: action.castable,
-            repeatable: action.repeatable,
-        };
-    });
+    clonedState.availableActions = gameState.availableActions;
 
     return clonedState;
 };

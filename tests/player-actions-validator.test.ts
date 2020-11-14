@@ -9,7 +9,7 @@ describe('getValidPlayerActions', () => {
         const validPlayerActionIds = getValidPlayerActionIds({
             playerId: '1',
             gameState: {
-                numOfRounds: 0,
+                roundId: 0,
                 players: {
                     [PLAYER_ID_ME]: {
                         numOfPotionsBrewed: 0,
@@ -22,7 +22,7 @@ describe('getValidPlayerActions', () => {
                         score: 0,
                     },
                 },
-                possibleActions: {
+                availableActions: {
                     '61': {
                         id: 61,
                         type: ActionType.BREW,
@@ -43,6 +43,10 @@ describe('getValidPlayerActions', () => {
                         castable: false,
                         repeatable: false,
                     },
+                },
+                cache: {
+                    avalableActionIds: ['32', '61'],
+                    playerIds: ['0', '1'],
                 },
             },
         });

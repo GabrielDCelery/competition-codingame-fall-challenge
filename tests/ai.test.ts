@@ -8,7 +8,7 @@ describe('AI', () => {
     it('calculates next move', () => {
         const nextPlayerActionId = choosePlayerActionId({
             gameState: {
-                numOfRounds: 0,
+                roundId: 0,
                 players: {
                     [PLAYER_ID_ME]: {
                         numOfPotionsBrewed: 0,
@@ -21,7 +21,7 @@ describe('AI', () => {
                         score: 0,
                     },
                 },
-                possibleActions: {
+                availableActions: {
                     '11': {
                         id: 11,
                         type: ActionType.BREW,
@@ -72,6 +72,20 @@ describe('AI', () => {
                         castable: false,
                         repeatable: false,
                     },
+                    '999': {
+                        id: 999,
+                        type: ActionType.WAIT,
+                        deltas: [0, 0, 0, 0],
+                        price: 0,
+                        tomeIndex: 0,
+                        taxCount: 0,
+                        castable: false,
+                        repeatable: false,
+                    },
+                },
+                cache: {
+                    playerIds: ['0', '1'],
+                    avalableActionIds: ['11', '22', '33', '44', '55', '999'],
                 },
             },
             playerId: PLAYER_ID_ME,
@@ -79,6 +93,6 @@ describe('AI', () => {
 
         console.log(nextPlayerActionId);
 
-        expect(true).to.deep.equal(true);
+        expect(nextPlayerActionId).to.deep.equal(nextPlayerActionId);
     });
 });

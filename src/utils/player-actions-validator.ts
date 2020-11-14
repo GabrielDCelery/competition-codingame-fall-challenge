@@ -1,5 +1,4 @@
 import { ActionType, GameState, PlayerAction } from '../shared';
-import { getPlayerIds, getPossibleActionIds } from './game-state';
 
 const isBrewPlayerActionValid = ({
     gameState,
@@ -28,7 +27,7 @@ const isPlayerActionValid = ({
     playerActionId: string;
     playerId: string;
 }): boolean => {
-    const playerAction = gameState.possibleActions[playerActionId];
+    const playerAction = gameState.availableActions[playerActionId];
     if (!playerAction) {
         throw new Error(`Not valid action id -> ${playerActionId}`);
     }
@@ -56,9 +55,9 @@ export const getValidPlayerActionIds = ({
     gameState: GameState;
     playerId: string;
 }): string[] => {
-    const possibleActionIds = getPossibleActionIds(gameState);
+    const availableActionIds = gameState.cache.avalableActionIds;
     const validPlayerActions: string[] = [];
-    possibleActionIds.forEach(playerActionId => {
+    availableActionIds.forEach(playerActionId => {
         if (!isPlayerActionValid({ gameState, playerId, playerActionId })) {
             return;
         }
@@ -67,19 +66,19 @@ export const getValidPlayerActionIds = ({
     return validPlayerActions;
 };
 
-export const getValidPlayerActionPairsForTurn = ({
+export const getValidPlayerActionIdPairsForTurn = ({
     gameState,
 }: {
     gameState: GameState;
 }): string[][] => {
-    const playerIds = getPlayerIds(gameState);
-    const possibleActionIds = getPossibleActionIds(gameState);
+    const playerIds = gameState.cache.playerIds;
+    const availableActionIds = gameState.cache.avalableActionIds;
     const validPlayerActionPairsForTurn: string[][] = [];
 
-    possibleActionIds.forEach(playerActionIdFirstPlayer => {
+    availableActionIds.forEach(availableActionIdFirstPlayer => {
         const canFirstPlayerExecute = isPlayerActionValid({
             gameState,
-            playerActionId: playerActionIdFirstPlayer,
+            playerActionId: availableActionIdFirstPlayer,
             playerId: playerIds[0],
         });
 
@@ -87,10 +86,10 @@ export const getValidPlayerActionPairsForTurn = ({
             return;
         }
 
-        possibleActionIds.forEach(playerActionIdSecondPlayer => {
+        availableActionIds.forEach(availableActionIdSecondPlayer => {
             const canSecondPlayerExecute = isPlayerActionValid({
                 gameState,
-                playerActionId: playerActionIdSecondPlayer,
+                playerActionId: availableActionIdSecondPlayer,
                 playerId: playerIds[1],
             });
 
@@ -99,8 +98,8 @@ export const getValidPlayerActionPairsForTurn = ({
             }
 
             validPlayerActionPairsForTurn.push([
-                playerActionIdFirstPlayer,
-                playerActionIdSecondPlayer,
+                availableActionIdFirstPlayer,
+                availableActionIdSecondPlayer,
             ]);
         });
     });

@@ -1,3 +1,3 @@
-export const joinPlayerActions = (actions: string[]): string => {
+export const joinPlayerActionIds = (actions: string[]): string => {
     return actions.join('_');
 };

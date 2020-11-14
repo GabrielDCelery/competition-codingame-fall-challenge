@@ -17,7 +17,6 @@ while (true) {
         gameState,
         playerId: PLAYER_ID_ME,
         playerActionId,
-        removeTakenActionFromPool: false,
     });
 
     console.log(gameLoopAction);
