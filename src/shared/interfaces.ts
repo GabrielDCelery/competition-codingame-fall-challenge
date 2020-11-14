@@ -1,6 +1,7 @@
 import { ActionType } from './enums';
 
 export interface PlayerState {
+    numOfPotionsBrewed: number;
     ingredients: number[];
     score: number;
 }
@@ -16,12 +17,8 @@ export interface PlayerAction {
     repeatable: boolean;
 }
 
-export interface ValidPlayerAction {
-    playerActionId: string;
-    newGameState: GameState;
-}
-
 export interface GameState {
+    numOfRounds: number;
     players: {
         [index: string]: PlayerState;
     };

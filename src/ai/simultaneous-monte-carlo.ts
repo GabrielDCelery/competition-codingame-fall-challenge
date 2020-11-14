@@ -1,57 +1,54 @@
-export type PlayerActionToStateApplier<TState, TAction> = ({
-    state,
-    action,
+export type ValidPlayerActionIdsGetter<TState> = ({
+    gameState,
     playerId,
 }: {
-    state: TState;
-    action: TAction;
+    gameState: TState;
     playerId: string;
+}) => string[];
+
+export type PlayerActionToGameStateApplier<TState> = ({
+    gameState,
+    playerActionId,
+    playerId,
+    removeTakenActionFromPool,
+}: {
+    gameState: TState;
+    playerActionId: string;
+    playerId: string;
+    removeTakenActionFromPool: boolean;
 }) => TState;
 
-export type StateScorer<TState> = ({
-    numOfSteps,
-    initialState,
-    terminalState,
-}: {
-    numOfSteps: number;
-    initialState: TState;
-    terminalState: TState;
-}) => number;
-
 export type TerminalStateChecker<TState> = ({
+    activePlayerChoseTheSameAction,
+    activePlayerId,
     initialState,
     prevState,
     currentState,
 }: {
+    activePlayerChoseTheSameAction: boolean;
+    activePlayerId: string;
     initialState: TState;
     prevState: TState;
     currentState: TState;
 }) => boolean;
 
-export type StateCloner<TState> = (state: TState) => TState;
-
-export type OpponentIdGetter = (playerId: string) => string;
-
-export type ValidPlayerActionsGetter<TState> = ({
-    gameState,
-    playerId,
-    removeTakenActionFromPool,
+export type OutcomeValuesGetter<TState> = ({
+    initialState,
+    terminalState,
 }: {
-    gameState: TState;
-    playerId: string;
-    removeTakenActionFromPool: boolean;
-}) => { playerActionId: string; newGameState: TState }[];
+    initialState: TState;
+    terminalState: TState;
+}) => number[];
 
 class MCNode<TState> {
     parent: MCNode<TState> | null;
     children: MCNode<TState>[];
     visitCount: number;
-    valueSum: number;
     playerActionId: null | string;
     gameState: TState;
     playerIds: string[];
     activePlayerIndex: number;
-    playerScores: number[];
+    valueSums: number[];
 
     constructor({
         parent,
@@ -69,19 +66,18 @@ class MCNode<TState> {
         this.parent = parent;
         this.children = [];
         this.visitCount = 0;
-        this.valueSum = 0;
         this.playerActionId = playerActionId;
         this.gameState = gameState;
         this.playerIds = playerIds;
         this.activePlayerIndex = activePlayerIndex;
-        this.playerScores = new Array(this.playerIds.length).fill(null).map(() => 0);
+        this.valueSums = [0, 0];
     }
 
     getValue(): number {
         if (this.visitCount === 0) {
             return Infinity;
         }
-        return this.valueSum / this.visitCount;
+        return this.valueSums[this.getOtherPlayerIndex()] / this.visitCount;
     }
 
     isLeafNode(): boolean {
@@ -93,24 +89,28 @@ class MCNode<TState> {
     }
 
     applyLeafNodes({
-        getValidPlayerActions,
+        getValidPlayerActionIds,
+        applyPlayerActionToGameState,
     }: {
-        getValidPlayerActions: ValidPlayerActionsGetter<TState>;
+        getValidPlayerActionIds: ValidPlayerActionIdsGetter<TState>;
+        applyPlayerActionToGameState: PlayerActionToGameStateApplier<TState>;
     }): void {
-        const playerId = this.playerIds[this.activePlayerIndex];
-        const validPlayerActions = getValidPlayerActions({
+        const validPlayerActionIds = getValidPlayerActionIds({
             gameState: this.gameState,
-            playerId,
-            removeTakenActionFromPool: !this.isFirstPlayer(),
+            playerId: this.getCurrentPlayerId(),
         });
-        const nextActivePlayerIndex = this.getNextActivePlayerIndex();
-        this.children = validPlayerActions.map(({ playerActionId, newGameState }) => {
+        this.children = validPlayerActionIds.map(playerActionId => {
             return new MCNode({
                 parent: this,
                 playerActionId,
-                gameState: newGameState,
+                gameState: applyPlayerActionToGameState({
+                    gameState: this.gameState,
+                    playerId: this.getCurrentPlayerId(),
+                    playerActionId,
+                    removeTakenActionFromPool: !this.isFirstPlayer(),
+                }),
                 playerIds: this.playerIds,
-                activePlayerIndex: nextActivePlayerIndex,
+                activePlayerIndex: this.getOtherPlayerIndex(),
             });
         });
     }
@@ -119,15 +119,21 @@ class MCNode<TState> {
         return this.activePlayerIndex === 0;
     }
 
-    getNextActivePlayerIndex(): number {
-        return this.playerIds[this.activePlayerIndex + 1] === undefined
-            ? 0
-            : this.activePlayerIndex + 1;
+    isSecondPlayer(): boolean {
+        return this.activePlayerIndex === 1;
     }
 
-    getMaxUCBNode(cConst: number): MCNode<TState> {
+    getOtherPlayerIndex(): number {
+        return this.activePlayerIndex === 0 ? 1 : 0;
+    }
+
+    getCurrentPlayerId(): string {
+        return this.playerIds[this.activePlayerIndex];
+    }
+
+    getMaxUCBNode({ cConst }: { cConst: number }): MCNode<TState> {
         let chosenNodeIndex = -1;
-        let chosenNodeVale = -1;
+        let chosenNodeVale = -Infinity;
 
         this.children.forEach((child, index) => {
             const nodeUCBValue =
@@ -135,7 +141,6 @@ class MCNode<TState> {
                     ? Infinity
                     : child.getValue() +
                       cConst * Math.sqrt(Math.log(this.visitCount) / child.visitCount);
-
             if (chosenNodeVale < nodeUCBValue) {
                 chosenNodeIndex = index;
                 chosenNodeVale = nodeUCBValue;
@@ -146,116 +151,135 @@ class MCNode<TState> {
     }
 }
 
-class SimultaneousMCSearch<TState, TAction> {
-    rootNode: MCNode<TState, TAction>;
+class SimultaneousMCSearch<TState> {
+    rootNode: MCNode<TState>;
     numOfMaxIterations: number;
     maxTimetoSpend: number;
     maxRolloutSteps: number;
-    availableActions: TAction[];
     cConst: number;
-    applyPlayerActionToState: PlayerActionToStateApplier<TState, TAction>;
-    scoreState: StateScorer<TState>;
+    getValidPlayerActionIds: ValidPlayerActionIdsGetter<TState>;
+    applyPlayerActionToGameState: PlayerActionToGameStateApplier<TState>;
+    getOutcomeValues: OutcomeValuesGetter<TState>;
     checkIfTerminalState: TerminalStateChecker<TState>;
-    cloneState: StateCloner<TState>;
-    getValidPlayerActions: ValidPlayerActionsGetter<TState>;
 
     constructor({
         startState,
         numOfMaxIterations,
         maxTimetoSpend,
-        availableActions,
         cConst,
         maxRolloutSteps,
         playerIds,
-        applyPlayerActionToState,
-        scoreState,
+        getValidPlayerActionIds,
+        applyPlayerActionToGameState,
+
+        getOutcomeValues,
         checkIfTerminalState,
-        cloneState,
-        getValidPlayerActions,
     }: {
         startState: TState;
         numOfMaxIterations: number;
         maxTimetoSpend: number;
-        availableActions: TAction[];
         cConst: number;
         maxRolloutSteps: number;
         playerIds: string[];
-        applyPlayerActionToState: PlayerActionToStateApplier<TState, TAction>;
-        scoreState: StateScorer<TState>;
+        getValidPlayerActionIds: ValidPlayerActionIdsGetter<TState>;
+        applyPlayerActionToGameState: PlayerActionToGameStateApplier<TState>;
+        getOutcomeValues: OutcomeValuesGetter<TState>;
         checkIfTerminalState: TerminalStateChecker<TState>;
-        cloneState: StateCloner<TState>;
-        getOpponentId: OpponentIdGetter;
-        getValidPlayerActions: ValidPlayerActionsGetter<TState>;
     }) {
         this.numOfMaxIterations = numOfMaxIterations;
         this.maxTimetoSpend = maxTimetoSpend;
         this.maxRolloutSteps = maxRolloutSteps;
-        this.availableActions = availableActions;
         this.cConst = cConst;
-        this.applyPlayerActionToState = applyPlayerActionToState;
-        this.scoreState = scoreState;
+        this.getValidPlayerActionIds = getValidPlayerActionIds;
+        this.applyPlayerActionToGameState = applyPlayerActionToGameState;
+        this.getOutcomeValues = getOutcomeValues;
         this.checkIfTerminalState = checkIfTerminalState;
-        this.cloneState = cloneState;
-        this.getValidPlayerActions = getValidPlayerActions;
-        this.rootNode = new MCNode<TState, TAction>({
+
+        this.rootNode = new MCNode<TState>({
             parent: null,
-            state: startState,
-            action: null,
+            gameState: startState,
+            playerActionId: null,
             playerIds,
             activePlayerIndex: 0,
         });
-        this.rootNode.applyLeafNodes(this.availableActions, this.applyPlayerActionToState);
+        this.rootNode.applyLeafNodes({
+            getValidPlayerActionIds: this.getValidPlayerActionIds,
+            applyPlayerActionToGameState: this.applyPlayerActionToGameState,
+        });
     }
 
-    traverse(startFromNode: MCNode<TState, TAction>): MCNode<TState, TAction> {
+    traverse(startFromNode: MCNode<TState>): MCNode<TState> {
         let currentNode = startFromNode;
         while (!currentNode.isLeafNode()) {
-            currentNode = currentNode.getMaxUCBNode(this.cConst);
+            currentNode = currentNode.getMaxUCBNode({ cConst: this.cConst });
         }
         return currentNode;
     }
 
-    rollout(startFromNode: MCNode<TState, TAction>): number {
+    rollout(startFromNode: MCNode<TState>): number[] {
         let currentRolloutSteps = 0;
         let isTerminalState = false;
-        let prevState = startFromNode.state;
-        let playerId = startFromNode.playerId;
+        let currentNode = startFromNode;
+
         while (!isTerminalState && currentRolloutSteps < this.maxRolloutSteps) {
             currentRolloutSteps += 1;
-            const randomlyChosenAction = this.availableActions[
-                Math.floor(Math.random() * this.availableActions.length)
-            ];
-            const currentState = this.applyPlayerActionToState({
-                state: prevState,
-                action: randomlyChosenAction,
-                playerId: playerId,
+
+            const validPlayerActionIds = this.getValidPlayerActionIds({
+                gameState: currentNode.gameState,
+                playerId: currentNode.getCurrentPlayerId(),
             });
+
+            if (validPlayerActionIds.length === 0) {
+                console.log(currentNode.getCurrentPlayerId());
+                console.log(JSON.stringify(currentNode.gameState));
+            }
+
+            const randomlyChosenActionId =
+                validPlayerActionIds[Math.floor(Math.random() * validPlayerActionIds.length)];
+
+            const nextNode = new MCNode({
+                parent: currentNode,
+                playerActionId: randomlyChosenActionId,
+                gameState: this.applyPlayerActionToGameState({
+                    gameState: currentNode.gameState,
+                    playerId: currentNode.getCurrentPlayerId(),
+                    playerActionId: randomlyChosenActionId,
+                    removeTakenActionFromPool: !currentNode.isFirstPlayer(),
+                }),
+                playerIds: currentNode.playerIds,
+                activePlayerIndex: currentNode.getOtherPlayerIndex(),
+            });
+
             isTerminalState = this.checkIfTerminalState({
-                initialState: this.rootNode.state,
-                prevState,
-                currentState,
+                activePlayerChoseTheSameAction:
+                    currentNode.playerActionId === nextNode.playerActionId,
+                activePlayerId: nextNode.getCurrentPlayerId(),
+                initialState: this.rootNode.gameState,
+                prevState: currentNode.gameState,
+                currentState: nextNode.gameState,
             });
-            prevState = currentState;
-            playerId = this.getOpponentId(playerId);
+
+            currentNode = nextNode;
         }
 
-        return this.scoreState({
-            numOfSteps: currentRolloutSteps,
-            initialState: this.rootNode.state,
-            terminalState: prevState,
+        return this.getOutcomeValues({
+            initialState: this.rootNode.gameState,
+            terminalState: currentNode.gameState,
         });
     }
 
-    backPropagate(startFromNode: MCNode<TState, TAction>, value: number): void {
-        startFromNode.valueSum = startFromNode.valueSum + value;
-        startFromNode.visitCount = startFromNode.visitCount + 1;
-        if (startFromNode.parent === null) {
+    backPropagate({ node, values }: { node: MCNode<TState>; values: number[] }): void {
+        values.forEach((value, index) => {
+            node.valueSums[index] += value;
+        });
+        node.visitCount = node.visitCount + 1;
+        if (node.parent === null) {
             return;
         }
-        this.backPropagate(startFromNode.parent, value);
+        this.backPropagate({ node: node.parent, values });
     }
 
-    chooseNextAction(): TAction {
+    chooseNextActionId(): string {
         let chosenNodeIndex = 0;
         let chosenNodeVale = 0;
         this.rootNode.children.forEach((child, index) => {
@@ -267,10 +291,10 @@ class SimultaneousMCSearch<TState, TAction> {
             }
         });
         const chosenNode = this.rootNode.children[chosenNodeIndex];
-        return chosenNode.action as TAction;
+        return chosenNode.playerActionId as string;
     }
 
-    run(): TAction {
+    run(): string {
         let numOfCurrentIterations = 0;
         const start = new Date().getTime();
         let keepRunning = true;
@@ -278,20 +302,23 @@ class SimultaneousMCSearch<TState, TAction> {
             let currentNode = this.traverse(this.rootNode);
 
             if (currentNode.hasBeenVisited()) {
-                currentNode.applyLeafNodes(this.availableActions, this.applyPlayerActionToState);
+                currentNode.applyLeafNodes({
+                    getValidPlayerActionIds: this.getValidPlayerActionIds,
+                    applyPlayerActionToGameState: this.applyPlayerActionToGameState,
+                });
                 currentNode = this.traverse(currentNode);
             }
 
-            const value = this.rollout(currentNode);
+            const values = this.rollout(currentNode);
 
-            this.backPropagate(currentNode, value);
+            this.backPropagate({ node: currentNode, values });
 
             numOfCurrentIterations += 1;
             const elapsed = new Date().getTime() - start;
             keepRunning =
                 numOfCurrentIterations < this.numOfMaxIterations && elapsed < this.maxTimetoSpend;
         }
-        return this.chooseNextAction();
+        return this.chooseNextActionId();
     }
 }
 

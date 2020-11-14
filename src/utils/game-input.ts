@@ -1,6 +1,16 @@
-import { ActionType, PlayerAction } from '../shared';
+import { ActionType, GameState } from '../shared';
 
-export const createActionForGameLoop = (playerAction: PlayerAction): string => {
+export const createActionForGameLoop = ({
+    gameState,
+    playerActionId,
+}: {
+    gameState: GameState;
+    playerActionId: string;
+}): string => {
+    const playerAction = gameState.possibleActions[playerActionId];
+    if (!playerAction) {
+        throw new Error(`Not valid action id -> ${playerActionId}`);
+    }
     const { type, id } = playerAction;
     switch (type) {
         case ActionType.BREW: {

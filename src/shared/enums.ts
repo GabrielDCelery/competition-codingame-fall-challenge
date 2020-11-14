@@ -3,4 +3,5 @@ export enum ActionType {
     OPPONENT_CAST = 'OPPONENT_CAST',
     LEARN = 'LEARN',
     BREW = 'BREW',
+    WAIT = 'WAIT',
 }
