@@ -1,4 +1,4 @@
-import { PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../config';
+import { PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../game-config';
 
 export const isPlayerMe = (playerId: string): boolean => {
     return playerId === PLAYER_ID_ME;

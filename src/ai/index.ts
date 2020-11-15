@@ -1,9 +1,11 @@
+import gameConfig, { RESPONSE_TIME_IN_TURNS_MS } from '../game-config';
 import { GameState } from '../shared';
 import {
     applyPlayerActionIdsToGameState,
     checkIfTerminalState,
     getValidPlayerActionIdPairsForTurn,
     cloneGameState,
+    scoreGameState,
 } from '../utils';
 import MonteCarlo, {
     ValidPlayerActionIdPairsGetter,
@@ -29,19 +31,16 @@ const mcApplyPlayerActionsToGameState: PlayerActionsToGameStateApplier<GameState
     });
 };
 
-const mcGetOutcomeValues: OutcomeValuesGetter<GameState> = ({ terminalState }) => {
-    const playerIds = terminalState.cache.playerIds;
-    const scores = playerIds.map(playerId => terminalState.players[playerId].score);
-
-    if (scores[0] === scores[1]) {
-        return [0.5, 0.5];
-    }
-
-    if (scores[0] > scores[1]) {
-        return [1, 0];
-    }
-
-    return [0, 1];
+const mcGetOutcomeValues: OutcomeValuesGetter<GameState> = ({
+    isTerminalState,
+    initialState,
+    terminalState,
+}) => {
+    return scoreGameState({
+        isTerminalState,
+        initialState,
+        terminalState,
+    });
 };
 
 const mcCheckIfTerminalState: TerminalStateChecker<GameState> = ({
@@ -66,10 +65,10 @@ export const choosePlayerActionId = ({
 }): string => {
     const mc = new MonteCarlo<GameState>({
         startState: gameState,
-        numOfMaxIterations: 10000,
-        maxTimetoSpend: 45,
-        maxRolloutSteps: 3,
-        cConst: 2,
+        numOfMaxIterations: gameConfig.monteCarlo.numOfMaxIterations,
+        maxTimetoSpend: RESPONSE_TIME_IN_TURNS_MS - 8,
+        maxRolloutSteps: gameConfig.monteCarlo.maxRolloutSteps,
+        cConst: gameConfig.monteCarlo.cConst,
         getValidPlayerActionIdPairs: mcGetValidPlayerActionIdPairs,
         applyPlayerActionsToGameState: mcApplyPlayerActionsToGameState,
         getOutcomeValues: mcGetOutcomeValues,

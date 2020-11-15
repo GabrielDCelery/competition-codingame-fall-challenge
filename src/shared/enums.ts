@@ -4,4 +4,9 @@ export enum ActionType {
     LEARN = 'LEARN',
     BREW = 'BREW',
     WAIT = 'WAIT',
+    REST = 'REST',
+}
+
+export enum League {
+    Wood1,
 }

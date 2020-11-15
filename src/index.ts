@@ -5,7 +5,7 @@ import {
     updateGameStateFromGameLoop,
 } from './utils';
 import { choosePlayerActionId } from './ai';
-import { PLAYER_ID_ME } from './config';
+import { PLAYER_ID_ME } from './game-config';
 
 let gameState = createInitialGameState();
 

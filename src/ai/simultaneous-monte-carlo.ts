@@ -23,9 +23,11 @@ export type TerminalStateChecker<TState> = ({
 }) => boolean;
 
 export type OutcomeValuesGetter<TState> = ({
+    isTerminalState,
     initialState,
     terminalState,
 }: {
+    isTerminalState?: boolean;
     initialState: TState;
     terminalState: TState;
 }) => number[];
@@ -99,61 +101,10 @@ class MCNode<TState> {
                 }),
                 cloneGameState: this.cloneGameState,
             });
-            /*
-            this.actionIdsToChildrenIndexesMap[
-                joinPlayerActionIds(validPlayerActionIdPair)
-            ] = index;
-            */
+
             this.children.push(child);
         });
     }
-    /*
-    getMaxUCBNode({ cConst }: { cConst: number }): MCNode<TState> {
-        console.log('--- getMaxUCBNode ---');
-        const playerIndexes = [0, 1];
-        const chosenNodeIndexes = [-1, -1];
-        const chosenNodeValues = [-Infinity, -Infinity];
-
-        this.children.forEach((child, index) => {
-            playerIndexes.forEach(playerIndex => {
-                const nodeUCBValue =
-                    child.visitCount === 0
-                        ? Infinity
-                        : child.getValue({ playerIndex }) +
-                          cConst * Math.sqrt(Math.log(this.visitCount) / child.visitCount);
-
-                if (
-                    playerIndex === 0 &&
-                    child.visitCount !== 0 &&
-                    chosenNodeValues[playerIndex] < nodeUCBValue
-                ) {
-                    //  console.log(`${chosenNodeValues[playerIndex]} - ${nodeUCBValue}`);
-                    console.log(child.playerActionIds);
-                    console.log(child.getValue({ playerIndex }));
-                }
-                if (chosenNodeValues[playerIndex] < nodeUCBValue) {
-                    chosenNodeIndexes[playerIndex] = index;
-                    chosenNodeValues[playerIndex] = nodeUCBValue;
-                }
-            });
-        });
-
-        const chodenActionIds = playerIndexes.map(playerIndex => {
-            const chosenNodeIndex = chosenNodeIndexes[playerIndex];
-            const chosenNode = this.children[chosenNodeIndex];
-            if (chosenNode.playerActionIds === null) {
-                throw new Error(`Tried to access null`);
-            }
-            return chosenNode.playerActionIds[playerIndex];
-        });
-
-        const maxUCBNodeIndex = this.actionIdsToChildrenIndexesMap[
-            joinPlayerActionIds(chodenActionIds)
-        ];
-
-        return this.children[maxUCBNodeIndex];
-    }
-    */
 
     getMaxUCBNode({
         cConst,
@@ -272,20 +223,22 @@ class SimultaneousMCSearch<TState> {
         while (true) {
             currentRolloutSteps += 1;
 
-            const reachedMaximumRollout = this.maxRolloutSteps < currentRolloutSteps;
-            if (reachedMaximumRollout) {
-                return this.getOutcomeValues({
-                    initialState: this.rootNode.gameState,
-                    terminalState: currentNode.gameState,
-                });
-            }
-
             const isTerminalState = this.checkIfTerminalState({
                 initialState: this.rootNode.gameState,
                 currentState: currentNode.gameState,
             });
 
             if (isTerminalState) {
+                return this.getOutcomeValues({
+                    isTerminalState: true,
+                    initialState: this.rootNode.gameState,
+                    terminalState: currentNode.gameState,
+                });
+            }
+
+            const reachedMaximumRollout = this.maxRolloutSteps < currentRolloutSteps;
+
+            if (reachedMaximumRollout) {
                 return this.getOutcomeValues({
                     initialState: this.rootNode.gameState,
                     terminalState: currentNode.gameState,

@@ -5,3 +5,4 @@ export * from './player';
 export * from './game-input';
 export * from './terminal-game-state';
 export * from './player-actions';
+export * from './game-state-scorer';

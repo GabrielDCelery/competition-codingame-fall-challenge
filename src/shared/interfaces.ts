@@ -4,9 +4,11 @@ export interface PlayerState {
     numOfPotionsBrewed: number;
     ingredients: number[];
     score: number;
+    learnedCastActionIds: string[];
+    availableCastActionIds: string[];
 }
 
-export interface PlayerAction {
+export interface PlayerActionConfig {
     id: number;
     type: ActionType;
     deltas: number[];
@@ -22,11 +24,9 @@ export interface GameState {
     players: {
         [index: string]: PlayerState;
     };
-    availableActions: {
-        [index: string]: PlayerAction;
+    availableActionConfigs: {
+        [index: string]: PlayerActionConfig;
     };
-    cache: {
-        playerIds: string[];
-        avalableActionIds: string[];
-    };
+    availableBrewActionIds: string[];
+    availableDefaultActionIds: string[];
 }

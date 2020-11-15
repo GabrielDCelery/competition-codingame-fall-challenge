@@ -7,7 +7,7 @@ export const createActionForGameLoop = ({
     gameState: GameState;
     playerActionId: string;
 }): string => {
-    const playerAction = gameState.availableActions[playerActionId];
+    const playerAction = gameState.availableActionConfigs[playerActionId];
     if (!playerAction) {
         throw new Error(`Not valid action id -> ${playerActionId}`);
     }
@@ -15,6 +15,15 @@ export const createActionForGameLoop = ({
     switch (type) {
         case ActionType.BREW: {
             return `${type} ${id}`;
+        }
+        case ActionType.CAST: {
+            return `${type} ${id}`;
+        }
+        case ActionType.REST: {
+            return `${type}`;
+        }
+        case ActionType.WAIT: {
+            return `${type}`;
         }
         default:
             throw new Error(`Invalid action -> ${type}`);

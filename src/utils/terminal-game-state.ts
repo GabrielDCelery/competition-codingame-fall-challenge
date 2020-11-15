@@ -1,3 +1,4 @@
+import config, { PLAYER_ID_ME, PLAYER_ID_OPPONENT, NUM_OF_GAME_ROUNDS } from '../game-config';
 import { GameState } from '../shared';
 
 export const checkIfTerminalState = ({
@@ -8,11 +9,17 @@ export const checkIfTerminalState = ({
     initialState: GameState;
     currentState: GameState;
 }): boolean => {
+    if (currentState.roundId === NUM_OF_GAME_ROUNDS) {
+        return true;
+    }
+
     if (
-        currentState.players['0'].numOfPotionsBrewed === 2 ||
-        currentState.players['1'].numOfPotionsBrewed === 2
+        currentState.players[PLAYER_ID_ME].numOfPotionsBrewed === config.numOfPotionsToBrewToWin ||
+        currentState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed ===
+            config.numOfPotionsToBrewToWin
     ) {
         return true;
     }
-    return currentState.cache.avalableActionIds.length === 1;
+
+    return false;
 };

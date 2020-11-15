@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
-import { PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../src/config';
+import { PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../src/game-config';
 import { ActionType, GameState } from '../src/shared';
 import { applyPlayerActionToGameState } from '../src/utils';
 
@@ -13,18 +13,22 @@ describe('applyPlayerActionToGameState', () => {
                     numOfPotionsBrewed: 0,
                     ingredients: [1, 1, 1, 1],
                     score: 0,
+                    learnedCastActionIds: [],
+                    availableCastActionIds: [],
                 },
                 [PLAYER_ID_OPPONENT]: {
                     numOfPotionsBrewed: 0,
                     ingredients: [1, 1, 1, 1],
                     score: 0,
+                    learnedCastActionIds: [],
+                    availableCastActionIds: [],
                 },
             },
-            availableActions: {
+            availableActionConfigs: {
                 '61': {
                     id: 61,
                     type: ActionType.BREW,
-                    deltas: [0, 2, 0, 0],
+                    deltas: [0, -2, 0, 0],
                     price: 10,
                     tomeIndex: 0,
                     taxCount: 0,
@@ -34,7 +38,7 @@ describe('applyPlayerActionToGameState', () => {
                 '32': {
                     id: 32,
                     type: ActionType.BREW,
-                    deltas: [0, 0, 0, 1],
+                    deltas: [0, 0, 0, -1],
                     price: 15,
                     tomeIndex: 0,
                     taxCount: 0,
@@ -42,10 +46,8 @@ describe('applyPlayerActionToGameState', () => {
                     repeatable: false,
                 },
             },
-            cache: {
-                avalableActionIds: ['32', '61'],
-                playerIds: ['0', '1'],
-            },
+            availableBrewActionIds: ['32', '61'],
+            availableDefaultActionIds: ['999'],
         };
         const playerActionId = '32';
         const playerId = PLAYER_ID_ME;
@@ -59,18 +61,26 @@ describe('applyPlayerActionToGameState', () => {
         expect(newGameState).to.deep.equal({
             roundId: 0,
             players: {
-                [PLAYER_ID_ME]: { numOfPotionsBrewed: 1, ingredients: [1, 1, 1, 0], score: 15 },
+                [PLAYER_ID_ME]: {
+                    numOfPotionsBrewed: 1,
+                    ingredients: [1, 1, 1, 0],
+                    score: 15,
+                    learnedCastActionIds: [],
+                    availableCastActionIds: [],
+                },
                 [PLAYER_ID_OPPONENT]: {
                     numOfPotionsBrewed: 0,
                     ingredients: [1, 1, 1, 1],
                     score: 0,
+                    learnedCastActionIds: [],
+                    availableCastActionIds: [],
                 },
             },
-            availableActions: {
+            availableActionConfigs: {
                 '32': {
                     id: 32,
                     type: 'BREW',
-                    deltas: [0, 0, 0, 1],
+                    deltas: [0, 0, 0, -1],
                     price: 15,
                     tomeIndex: 0,
                     taxCount: 0,
@@ -80,7 +90,7 @@ describe('applyPlayerActionToGameState', () => {
                 '61': {
                     id: 61,
                     type: 'BREW',
-                    deltas: [0, 2, 0, 0],
+                    deltas: [0, -2, 0, 0],
                     price: 10,
                     tomeIndex: 0,
                     taxCount: 0,
@@ -88,10 +98,8 @@ describe('applyPlayerActionToGameState', () => {
                     repeatable: false,
                 },
             },
-            cache: {
-                avalableActionIds: ['61'],
-                playerIds: ['0', '1'],
-            },
+            availableBrewActionIds: ['61'],
+            availableDefaultActionIds: ['999'],
         });
     });
 
@@ -103,18 +111,22 @@ describe('applyPlayerActionToGameState', () => {
                     numOfPotionsBrewed: 0,
                     ingredients: [1, 1, 1, 1],
                     score: 0,
+                    learnedCastActionIds: [],
+                    availableCastActionIds: [],
                 },
                 [PLAYER_ID_OPPONENT]: {
                     numOfPotionsBrewed: 0,
                     ingredients: [1, 1, 1, 1],
                     score: 0,
+                    learnedCastActionIds: [],
+                    availableCastActionIds: [],
                 },
             },
-            availableActions: {
+            availableActionConfigs: {
                 '61': {
                     id: 61,
                     type: ActionType.BREW,
-                    deltas: [0, 2, 0, 0],
+                    deltas: [0, -2, 0, 0],
                     price: 10,
                     tomeIndex: 0,
                     taxCount: 0,
@@ -124,7 +136,7 @@ describe('applyPlayerActionToGameState', () => {
                 '32': {
                     id: 32,
                     type: ActionType.BREW,
-                    deltas: [0, 0, 0, 1],
+                    deltas: [0, 0, 0, -1],
                     price: 15,
                     tomeIndex: 0,
                     taxCount: 0,
@@ -132,10 +144,8 @@ describe('applyPlayerActionToGameState', () => {
                     repeatable: false,
                 },
             },
-            cache: {
-                avalableActionIds: ['32', '61'],
-                playerIds: ['0', '1'],
-            },
+            availableBrewActionIds: ['32', '61'],
+            availableDefaultActionIds: ['999'],
         };
         const playerActionId = '32';
         const playerId = PLAYER_ID_OPPONENT;
@@ -149,14 +159,26 @@ describe('applyPlayerActionToGameState', () => {
         expect(newGameState).to.deep.equal({
             roundId: 0,
             players: {
-                '0': { numOfPotionsBrewed: 0, ingredients: [1, 1, 1, 1], score: 0 },
-                '1': { numOfPotionsBrewed: 1, ingredients: [1, 1, 1, 0], score: 15 },
+                '0': {
+                    numOfPotionsBrewed: 0,
+                    ingredients: [1, 1, 1, 1],
+                    score: 0,
+                    learnedCastActionIds: [],
+                    availableCastActionIds: [],
+                },
+                '1': {
+                    numOfPotionsBrewed: 1,
+                    ingredients: [1, 1, 1, 0],
+                    score: 15,
+                    learnedCastActionIds: [],
+                    availableCastActionIds: [],
+                },
             },
-            availableActions: {
+            availableActionConfigs: {
                 '32': {
                     id: 32,
                     type: 'BREW',
-                    deltas: [0, 0, 0, 1],
+                    deltas: [0, 0, 0, -1],
                     price: 15,
                     tomeIndex: 0,
                     taxCount: 0,
@@ -166,7 +188,7 @@ describe('applyPlayerActionToGameState', () => {
                 '61': {
                     id: 61,
                     type: 'BREW',
-                    deltas: [0, 2, 0, 0],
+                    deltas: [0, -2, 0, 0],
                     price: 10,
                     tomeIndex: 0,
                     taxCount: 0,
@@ -174,10 +196,8 @@ describe('applyPlayerActionToGameState', () => {
                     repeatable: false,
                 },
             },
-            cache: {
-                avalableActionIds: ['61'],
-                playerIds: ['0', '1'],
-            },
+            availableBrewActionIds: ['61'],
+            availableDefaultActionIds: ['999'],
         });
     });
 });
