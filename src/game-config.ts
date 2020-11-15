@@ -13,7 +13,7 @@ interface LeagueConfig {
         numOfMaxIterations: number;
         cConst: number;
         maxRolloutSteps: number;
-        unusedIngredientScoreWeight: number;
+        unusedIngredientScoreWeights: number[];
     };
     defaultActionConfigs: PlayerActionConfig[];
 }
@@ -26,7 +26,7 @@ const configs: { [index: string]: LeagueConfig } = {
             numOfMaxIterations: 10000,
             cConst: 2,
             maxRolloutSteps: 5,
-            unusedIngredientScoreWeight: 0.4,
+            unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
         },
         defaultActionConfigs: [
             /*

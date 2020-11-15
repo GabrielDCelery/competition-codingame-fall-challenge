@@ -9,14 +9,15 @@ const scoreUnusedIngredients = ({
     playerId: string;
 }): number => {
     const ingredients = gameState.players[playerId].ingredients;
+    const weights = gameConfig.monteCarlo.unusedIngredientScoreWeights;
 
     const totalScore =
-        ingredients[0] * INGREDIENT_VALUES[0] +
-        ingredients[1] * INGREDIENT_VALUES[1] +
-        ingredients[2] * INGREDIENT_VALUES[2] +
-        ingredients[3] * INGREDIENT_VALUES[3];
+        ingredients[0] * INGREDIENT_VALUES[0] * weights[0] +
+        ingredients[1] * INGREDIENT_VALUES[1] * weights[1] +
+        ingredients[2] * INGREDIENT_VALUES[2] * weights[2] +
+        ingredients[3] * INGREDIENT_VALUES[3] * weights[3];
 
-    return totalScore * gameConfig.monteCarlo.unusedIngredientScoreWeight;
+    return totalScore;
 };
 
 export const scoreGameState = ({

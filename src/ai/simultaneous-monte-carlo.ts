@@ -276,25 +276,6 @@ class SimultaneousMCSearch<TState> {
         }
         this.backPropagate({ node: node.parent, values });
     }
-    /*
-    chooseNextActionId(): string {
-        let chosenNodeIndex = 0;
-        let chosenNodeValue = 0;
-        this.rootNode.children.forEach((child, index) => {
-            const nodeValue = child.visitCount;
-
-            if (chosenNodeValue < nodeValue) {
-                chosenNodeIndex = index;
-                chosenNodeValue = nodeValue;
-            }
-        });
-        const chosenNode = this.rootNode.children[chosenNodeIndex];
-        if (chosenNode.playerActionIds === null) {
-            throw new Error(`Tried to pick action from rootnode`);
-        }
-        return chosenNode.playerActionIds[0];
-    }
-*/
 
     chooseNextActionId(): string {
         const groupedWinrates: { [index: string]: number[] } = {};
@@ -333,13 +314,20 @@ class SimultaneousMCSearch<TState> {
     run(): string {
         let numOfCurrentIterations = 0;
         const start = new Date().getTime();
-        let keepRunning = true;
         let playerRunningTheSimulation = 0;
-        while (keepRunning) {
+        while (true) {
+            if (this.maxTimetoSpend < new Date().getTime() - start) {
+                return this.chooseNextActionId();
+            }
+
             let currentNode = this.traverse({
                 startFromNode: this.rootNode,
                 playerRunningTheSimulation,
             });
+
+            if (this.maxTimetoSpend < new Date().getTime() - start) {
+                return this.chooseNextActionId();
+            }
 
             const isTerminalState = this.checkIfTerminalState({
                 initialState: this.rootNode.gameState,
@@ -357,18 +345,29 @@ class SimultaneousMCSearch<TState> {
                 });
             }
 
+            if (this.maxTimetoSpend < new Date().getTime() - start) {
+                return this.chooseNextActionId();
+            }
+
             const values = this.rollout(currentNode);
 
+            if (this.maxTimetoSpend < new Date().getTime() - start) {
+                return this.chooseNextActionId();
+            }
+
             this.backPropagate({ node: currentNode, values });
+
+            if (this.maxTimetoSpend < new Date().getTime() - start) {
+                return this.chooseNextActionId();
+            }
 
             numOfCurrentIterations += 1;
             playerRunningTheSimulation = playerRunningTheSimulation === 0 ? 1 : 0;
 
-            const elapsed = new Date().getTime() - start;
-            keepRunning =
-                numOfCurrentIterations < this.numOfMaxIterations && elapsed < this.maxTimetoSpend;
+            if (this.numOfMaxIterations < numOfCurrentIterations) {
+                return this.chooseNextActionId();
+            }
         }
-        return this.chooseNextActionId();
     }
 }
 

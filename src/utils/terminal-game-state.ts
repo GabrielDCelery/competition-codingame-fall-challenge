@@ -14,8 +14,8 @@ export const checkIfTerminalState = ({
     }
 
     if (
-        currentState.players[PLAYER_ID_ME].numOfPotionsBrewed === config.numOfPotionsToBrewToWin ||
-        currentState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed ===
+        currentState.players[PLAYER_ID_ME].numOfPotionsBrewed >= config.numOfPotionsToBrewToWin ||
+        currentState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed >=
             config.numOfPotionsToBrewToWin
     ) {
         return true;

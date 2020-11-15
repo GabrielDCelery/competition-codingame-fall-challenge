@@ -152,7 +152,9 @@ const getValidActionsForPlayer = ({
         });
     });
 
-    return [...validBrewActions, ...validCastActions, ...validDefaultActions];
+    const validActions = [...validBrewActions, ...validCastActions, ...validDefaultActions];
+
+    return validActions.length === 0 ? gameState.availableDefaultActionIds : validActions;
 };
 
 export const getValidPlayerActionIdPairsForTurn = ({

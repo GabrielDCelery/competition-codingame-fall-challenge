@@ -66,7 +66,7 @@ export const choosePlayerActionId = ({
     const mc = new MonteCarlo<GameState>({
         startState: gameState,
         numOfMaxIterations: gameConfig.monteCarlo.numOfMaxIterations,
-        maxTimetoSpend: RESPONSE_TIME_IN_TURNS_MS - 8,
+        maxTimetoSpend: RESPONSE_TIME_IN_TURNS_MS - 5,
         maxRolloutSteps: gameConfig.monteCarlo.maxRolloutSteps,
         cConst: gameConfig.monteCarlo.cConst,
         getValidPlayerActionIdPairs: mcGetValidPlayerActionIdPairs,
@@ -76,13 +76,5 @@ export const choosePlayerActionId = ({
         cloneGameState: mcCloneGameState,
     });
     const chosenActionId = mc.run();
-    /*
-    console.log('playerActionIds');
-    console.log(mc.rootNode.children.map(e => e.playerActionIds));
-    console.log('visitCount');
-    console.log(mc.rootNode.children.map(e => e.visitCount));
-    console.log('valueSums');
-    console.log(mc.rootNode.children.map(e => e.valueSums));
-    */
     return chosenActionId;
 };
