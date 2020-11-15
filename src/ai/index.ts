@@ -66,7 +66,7 @@ export const choosePlayerActionId = ({
     const mc = new MonteCarlo<GameState>({
         startState: gameState,
         numOfMaxIterations: gameConfig.monteCarlo.numOfMaxIterations,
-        maxTimetoSpend: RESPONSE_TIME_IN_TURNS_MS - 5,
+        maxTimetoSpend: RESPONSE_TIME_IN_TURNS_MS - 10,
         maxRolloutSteps: gameConfig.monteCarlo.maxRolloutSteps,
         cConst: gameConfig.monteCarlo.cConst,
         getValidPlayerActionIdPairs: mcGetValidPlayerActionIdPairs,
