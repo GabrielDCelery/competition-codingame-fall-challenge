@@ -63,7 +63,11 @@ export const applyPlayerActionToGameState = ({
             });
         }
         default:
-            throw new Error(`Invalid action type -> ${type}`);
+            return applyWaitPlayerActionToGameState({
+                gameState,
+                playerAction,
+                playerId,
+            });
     }
 };
 

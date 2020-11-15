@@ -155,25 +155,26 @@ class MCNode<TState> {
     }
     */
 
-    getMaxUCBNode({ cConst }: { cConst: number }): MCNode<TState> {
-        const playerIndexes = [0, 1];
+    getMaxUCBNode({
+        cConst,
+        playerRunningTheSimulation,
+    }: {
+        cConst: number;
+        playerRunningTheSimulation: number;
+    }): MCNode<TState> {
         let chosenNodeIndex = -1;
         let chosenNodeValue = -Infinity;
 
         this.children.forEach((child, index) => {
-            let totalNodeUCBValue = 0;
+            const nodeUCBValue =
+                child.visitCount === 0
+                    ? Infinity
+                    : child.getValue({ playerIndex: playerRunningTheSimulation }) +
+                      cConst * Math.sqrt(Math.log(this.visitCount) / child.visitCount);
 
-            playerIndexes.forEach(playerIndex => {
-                totalNodeUCBValue +=
-                    child.visitCount === 0
-                        ? Infinity
-                        : child.getValue({ playerIndex }) +
-                          cConst * Math.sqrt(Math.log(this.visitCount) / child.visitCount);
-            });
-
-            if (chosenNodeValue < totalNodeUCBValue) {
+            if (chosenNodeValue < nodeUCBValue) {
                 chosenNodeIndex = index;
-                chosenNodeValue = totalNodeUCBValue;
+                chosenNodeValue = nodeUCBValue;
             }
         });
 
@@ -247,10 +248,19 @@ class SimultaneousMCSearch<TState> {
         });
     }
 
-    traverse(startFromNode: MCNode<TState>): MCNode<TState> {
+    traverse({
+        startFromNode,
+        playerRunningTheSimulation,
+    }: {
+        startFromNode: MCNode<TState>;
+        playerRunningTheSimulation: number;
+    }): MCNode<TState> {
         let currentNode = startFromNode;
         while (!currentNode.isLeafNode()) {
-            currentNode = currentNode.getMaxUCBNode({ cConst: this.cConst });
+            currentNode = currentNode.getMaxUCBNode({
+                cConst: this.cConst,
+                playerRunningTheSimulation,
+            });
         }
         return currentNode;
     }
@@ -313,7 +323,7 @@ class SimultaneousMCSearch<TState> {
         }
         this.backPropagate({ node: node.parent, values });
     }
-
+    /*
     chooseNextActionId(): string {
         let chosenNodeIndex = 0;
         let chosenNodeValue = 0;
@@ -331,13 +341,52 @@ class SimultaneousMCSearch<TState> {
         }
         return chosenNode.playerActionIds[0];
     }
+*/
+
+    chooseNextActionId(): string {
+        const groupedWinrates: { [index: string]: number[] } = {};
+
+        this.rootNode.children.forEach(child => {
+            const winPercentage = child.valueSums[0] / child.visitCount;
+            if (child.playerActionIds === null) {
+                return;
+            }
+            const playerActionId = child.playerActionIds[0];
+
+            if (!groupedWinrates[playerActionId]) {
+                groupedWinrates[playerActionId] = [];
+            }
+
+            groupedWinrates[playerActionId].push(winPercentage);
+        });
+
+        const playerActionIds = Object.keys(groupedWinrates);
+        let chosenActionId = '';
+        let chosenActionWinPercentage = 0;
+
+        playerActionIds.forEach(key => {
+            const winPercentage =
+                groupedWinrates[key].reduce((a, b) => a + b, 0) / groupedWinrates[key].length;
+
+            if (chosenActionWinPercentage < winPercentage) {
+                chosenActionWinPercentage = winPercentage;
+                chosenActionId = key;
+            }
+        });
+
+        return chosenActionId;
+    }
 
     run(): string {
         let numOfCurrentIterations = 0;
         const start = new Date().getTime();
         let keepRunning = true;
+        let playerRunningTheSimulation = 0;
         while (keepRunning) {
-            let currentNode = this.traverse(this.rootNode);
+            let currentNode = this.traverse({
+                startFromNode: this.rootNode,
+                playerRunningTheSimulation,
+            });
 
             const isTerminalState = this.checkIfTerminalState({
                 initialState: this.rootNode.gameState,
@@ -349,7 +398,10 @@ class SimultaneousMCSearch<TState> {
                     getValidPlayerActionIdPairs: this.getValidPlayerActionIdPairs,
                     applyPlayerActionsToGameState: this.applyPlayerActionsToGameState,
                 });
-                currentNode = this.traverse(currentNode);
+                currentNode = this.traverse({
+                    startFromNode: currentNode,
+                    playerRunningTheSimulation,
+                });
             }
 
             const values = this.rollout(currentNode);
@@ -357,6 +409,8 @@ class SimultaneousMCSearch<TState> {
             this.backPropagate({ node: currentNode, values });
 
             numOfCurrentIterations += 1;
+            playerRunningTheSimulation = playerRunningTheSimulation === 0 ? 1 : 0;
+
             const elapsed = new Date().getTime() - start;
             keepRunning =
                 numOfCurrentIterations < this.numOfMaxIterations && elapsed < this.maxTimetoSpend;

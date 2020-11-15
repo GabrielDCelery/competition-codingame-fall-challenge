@@ -91,8 +91,6 @@ describe('AI', () => {
             playerId: PLAYER_ID_ME,
         });
 
-        console.log(nextPlayerActionId);
-
-        expect(nextPlayerActionId).to.deep.equal(nextPlayerActionId);
+        expect(nextPlayerActionId).to.deep.equal('44');
     });
 });
