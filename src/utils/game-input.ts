@@ -5,7 +5,7 @@ export const createActionForGameLoop = ({
     playerActionId,
 }: {
     gameState: GameState;
-    playerActionId: string;
+    playerActionId: number;
 }): string => {
     const playerAction = gameState.availableActionConfigs[playerActionId];
     if (!playerAction) {

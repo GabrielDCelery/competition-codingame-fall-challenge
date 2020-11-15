@@ -87,12 +87,12 @@ describe('AI', () => {
                         repeatable: false,
                     },
                 },
-                availableBrewActionIds: ['11', '22', '33', '44', '55'],
-                availableDefaultActionIds: ['999'],
+                availableBrewActionIds: [11, 22, 33, 44, 55],
+                availableDefaultActionIds: [999],
             },
             playerId: PLAYER_ID_ME,
         });
 
-        expect(nextPlayerActionId).to.deep.equal('55');
+        expect(nextPlayerActionId).to.deep.equal(55);
     });
 });

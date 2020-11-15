@@ -12,15 +12,15 @@ describe('cloneGameState', () => {
                     numOfPotionsBrewed: 0,
                     ingredients: [5, 0, 0, 0],
                     score: 0,
-                    learnedCastActionIds: ['78', '79'],
-                    availableCastActionIds: ['79'],
+                    learnedCastActionIds: [78, 79],
+                    availableCastActionIds: [79],
                 },
                 '1': {
                     numOfPotionsBrewed: 0,
                     ingredients: [1, 3, 3, 3],
                     score: 0,
-                    learnedCastActionIds: ['81', '82'],
-                    availableCastActionIds: ['81'],
+                    learnedCastActionIds: [81, 82],
+                    availableCastActionIds: [81],
                 },
             },
             availableActionConfigs: {
@@ -135,8 +135,8 @@ describe('cloneGameState', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['11', '22', '33', '44', '55'],
-            availableDefaultActionIds: ['999', '888'],
+            availableBrewActionIds: [11, 22, 33, 44, 55],
+            availableDefaultActionIds: [999, 888],
         };
 
         const beforeCloning = JSON.parse(JSON.stringify(toClone));

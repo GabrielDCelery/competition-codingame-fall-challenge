@@ -19,7 +19,7 @@ const applyBrewPlayerActionToGameState = ({
     newGameState.players[playerId].ingredients = newPlayerIngredients;
     newGameState.players[playerId].score += playerAction.price;
     newGameState.availableBrewActionIds = newGameState.availableBrewActionIds.filter(item => {
-        return item !== `${playerAction.id}`;
+        return item !== playerAction.id;
     });
     return newGameState;
 };
@@ -57,7 +57,7 @@ const applyCastPlayerActionToGameState = ({
     newGameState.players[playerId].availableCastActionIds = newGameState.players[
         playerId
     ].availableCastActionIds.filter(item => {
-        return item !== `${playerAction.id}`;
+        return item !== playerAction.id;
     });
     return newGameState;
 };
@@ -78,7 +78,7 @@ export const applyPlayerActionToGameState = ({
     playerId,
 }: {
     gameState: GameState;
-    playerActionId: string;
+    playerActionId: number;
     playerId: string;
 }): GameState => {
     const playerAction = gameState.availableActionConfigs[playerActionId];
@@ -131,7 +131,7 @@ export const applyPlayerActionIdsToGameState = ({
     playerActionIds,
 }: {
     gameState: GameState;
-    playerActionIds: string[];
+    playerActionIds: number[];
 }): GameState => {
     let newGameState = cloneGameState({ gameState });
     const playerIds = [PLAYER_ID_ME, PLAYER_ID_OPPONENT];

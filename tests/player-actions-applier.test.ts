@@ -46,10 +46,10 @@ describe('applyPlayerActionToGameState', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['32', '61'],
-            availableDefaultActionIds: ['999'],
+            availableBrewActionIds: [32, 61],
+            availableDefaultActionIds: [999],
         };
-        const playerActionId = '32';
+        const playerActionId = 32;
         const playerId = PLAYER_ID_ME;
 
         const newGameState = applyPlayerActionToGameState({
@@ -98,8 +98,8 @@ describe('applyPlayerActionToGameState', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['61'],
-            availableDefaultActionIds: ['999'],
+            availableBrewActionIds: [61],
+            availableDefaultActionIds: [999],
         });
     });
 
@@ -144,10 +144,10 @@ describe('applyPlayerActionToGameState', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['32', '61'],
-            availableDefaultActionIds: ['999'],
+            availableBrewActionIds: [32, 61],
+            availableDefaultActionIds: [999],
         };
-        const playerActionId = '32';
+        const playerActionId = 32;
         const playerId = PLAYER_ID_OPPONENT;
 
         const newGameState = applyPlayerActionToGameState({
@@ -196,8 +196,8 @@ describe('applyPlayerActionToGameState', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['61'],
-            availableDefaultActionIds: ['999'],
+            availableBrewActionIds: [61],
+            availableDefaultActionIds: [999],
         });
     });
 });

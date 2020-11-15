@@ -57,8 +57,8 @@ describe('getValidPlayerActionIdPairsForTurn', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['32', '61'],
-            availableDefaultActionIds: ['999'],
+            availableBrewActionIds: [32, 61],
+            availableDefaultActionIds: [999],
         };
 
         const playerActionPairs = getValidPlayerActionIdPairsForTurn({
@@ -66,12 +66,12 @@ describe('getValidPlayerActionIdPairsForTurn', () => {
         });
 
         expect(playerActionPairs).to.deep.equal([
-            ['32', '32'],
-            ['32', '61'],
-            ['32', '999'],
-            ['999', '32'],
-            ['999', '61'],
-            ['999', '999'],
+            [32, 32],
+            [32, 61],
+            [32, 999],
+            [999, 32],
+            [999, 61],
+            [999, 999],
         ]);
     });
 
@@ -127,8 +127,8 @@ describe('getValidPlayerActionIdPairsForTurn', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['61'],
-            availableDefaultActionIds: ['999'],
+            availableBrewActionIds: [61],
+            availableDefaultActionIds: [999],
         };
 
         const playerActionPairs = getValidPlayerActionIdPairsForTurn({
@@ -136,8 +136,8 @@ describe('getValidPlayerActionIdPairsForTurn', () => {
         });
 
         expect(playerActionPairs).to.deep.equal([
-            ['999', '61'],
-            ['999', '999'],
+            [999, 61],
+            [999, 999],
         ]);
     });
 });

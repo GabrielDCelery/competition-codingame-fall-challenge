@@ -4,14 +4,14 @@ export type ValidPlayerActionIdPairsGetter<TState> = ({
     gameState,
 }: {
     gameState: TState;
-}) => string[][];
+}) => number[][];
 
 export type PlayerActionsToGameStateApplier<TState> = ({
     gameState,
     playerActionIds,
 }: {
     gameState: TState;
-    playerActionIds: string[];
+    playerActionIds: number[];
 }) => TState;
 
 export type TerminalStateChecker<TState> = ({
@@ -38,10 +38,9 @@ class MCNode<TState> {
     parent: MCNode<TState> | null;
     children: MCNode<TState>[];
     visitCount: number;
-    playerActionIds: string[] | null;
+    playerActionIds: number[] | null;
     gameState: TState;
     valueSums: number[];
-    actionIdsToChildrenIndexesMap: { [index: string]: number };
     cloneGameState: GameStateCloner<TState>;
 
     constructor({
@@ -51,7 +50,7 @@ class MCNode<TState> {
         cloneGameState,
     }: {
         parent: MCNode<TState> | null;
-        playerActionIds: string[] | null;
+        playerActionIds: number[] | null;
         gameState: TState;
         cloneGameState: GameStateCloner<TState>;
     }) {
@@ -61,7 +60,6 @@ class MCNode<TState> {
         this.playerActionIds = playerActionIds;
         this.gameState = gameState;
         this.valueSums = [0, 0];
-        this.actionIdsToChildrenIndexesMap = {};
         this.cloneGameState = cloneGameState;
     }
 
@@ -277,7 +275,7 @@ class SimultaneousMCSearch<TState> {
         this.backPropagate({ node: node.parent, values });
     }
 
-    chooseNextActionId(): string {
+    chooseNextActionId(): number {
         const groupedWinrates: { [index: string]: number[] } = {};
 
         this.rootNode.children.forEach(child => {
@@ -295,7 +293,7 @@ class SimultaneousMCSearch<TState> {
         });
 
         const playerActionIds = Object.keys(groupedWinrates);
-        let chosenActionId = '';
+        let chosenActionId = -1;
         let chosenActionWinPercentage = 0;
 
         playerActionIds.forEach(key => {
@@ -304,14 +302,14 @@ class SimultaneousMCSearch<TState> {
 
             if (chosenActionWinPercentage < winPercentage) {
                 chosenActionWinPercentage = winPercentage;
-                chosenActionId = key;
+                chosenActionId = parseInt(key);
             }
         });
 
         return chosenActionId;
     }
 
-    run(): string {
+    run(): number {
         let numOfCurrentIterations = 0;
         const start = new Date().getTime();
         let playerRunningTheSimulation = 0;

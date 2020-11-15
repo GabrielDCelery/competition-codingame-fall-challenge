@@ -62,7 +62,7 @@ export const choosePlayerActionId = ({
 }: {
     gameState: GameState;
     playerId: string;
-}): string => {
+}): number => {
     const mc = new MonteCarlo<GameState>({
         startState: gameState,
         numOfMaxIterations: gameConfig.monteCarlo.numOfMaxIterations,

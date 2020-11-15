@@ -14,15 +14,15 @@ describe('applyPlayerActionIdsToGameState', () => {
                         numOfPotionsBrewed: 0,
                         ingredients: [2, 2, 3, 3],
                         score: 0,
-                        learnedCastActionIds: ['78', '79'],
-                        availableCastActionIds: ['78', '79'],
+                        learnedCastActionIds: [78, 79],
+                        availableCastActionIds: [78, 79],
                     },
                     [PLAYER_ID_OPPONENT]: {
                         numOfPotionsBrewed: 0,
                         ingredients: [2, 2, 3, 3],
                         score: 0,
-                        learnedCastActionIds: ['81', '82'],
-                        availableCastActionIds: ['81', '82'],
+                        learnedCastActionIds: [81, 82],
+                        availableCastActionIds: [81, 82],
                     },
                 },
                 availableActionConfigs: {
@@ -137,10 +137,10 @@ describe('applyPlayerActionIdsToGameState', () => {
                         repeatable: false,
                     },
                 },
-                availableBrewActionIds: ['11', '22', '33', '44', '55'],
-                availableDefaultActionIds: ['999', '888'],
+                availableBrewActionIds: [11, 22, 33, 44, 55],
+                availableDefaultActionIds: [999, 888],
             },
-            playerActionIds: ['33', '11'],
+            playerActionIds: [33, 11],
         });
 
         expect(newGameState).to.deep.equal({
@@ -150,15 +150,15 @@ describe('applyPlayerActionIdsToGameState', () => {
                     numOfPotionsBrewed: 1,
                     ingredients: [1, 2, 3, 3],
                     score: 9,
-                    learnedCastActionIds: ['78', '79'],
-                    availableCastActionIds: ['78', '79'],
+                    learnedCastActionIds: [78, 79],
+                    availableCastActionIds: [78, 79],
                 },
                 '1': {
                     numOfPotionsBrewed: 1,
                     ingredients: [2, 1, 3, 2],
                     score: 12,
-                    learnedCastActionIds: ['81', '82'],
-                    availableCastActionIds: ['81', '82'],
+                    learnedCastActionIds: [81, 82],
+                    availableCastActionIds: [81, 82],
                 },
             },
             availableActionConfigs: {
@@ -273,8 +273,8 @@ describe('applyPlayerActionIdsToGameState', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['22', '44', '55'],
-            availableDefaultActionIds: ['999', '888'],
+            availableBrewActionIds: [22, 44, 55],
+            availableDefaultActionIds: [999, 888],
         });
     });
 
@@ -287,15 +287,15 @@ describe('applyPlayerActionIdsToGameState', () => {
                         numOfPotionsBrewed: 0,
                         ingredients: [3, 0, 0, 0],
                         score: 0,
-                        learnedCastActionIds: ['78', '79'],
-                        availableCastActionIds: ['78', '79'],
+                        learnedCastActionIds: [78, 79],
+                        availableCastActionIds: [78, 79],
                     },
                     [PLAYER_ID_OPPONENT]: {
                         numOfPotionsBrewed: 0,
                         ingredients: [2, 2, 3, 3],
                         score: 0,
-                        learnedCastActionIds: ['81', '82'],
-                        availableCastActionIds: ['81', '82'],
+                        learnedCastActionIds: [81, 82],
+                        availableCastActionIds: [81, 82],
                     },
                 },
                 availableActionConfigs: {
@@ -410,10 +410,10 @@ describe('applyPlayerActionIdsToGameState', () => {
                         repeatable: false,
                     },
                 },
-                availableBrewActionIds: ['11', '22', '33', '44', '55'],
-                availableDefaultActionIds: ['999', '888'],
+                availableBrewActionIds: [11, 22, 33, 44, 55],
+                availableDefaultActionIds: [999, 888],
             },
-            playerActionIds: ['78', '82'],
+            playerActionIds: [78, 82],
         });
 
         expect(newGameState).to.deep.equal({
@@ -423,15 +423,15 @@ describe('applyPlayerActionIdsToGameState', () => {
                     numOfPotionsBrewed: 0,
                     ingredients: [5, 0, 0, 0],
                     score: 0,
-                    learnedCastActionIds: ['78', '79'],
-                    availableCastActionIds: ['79'],
+                    learnedCastActionIds: [78, 79],
+                    availableCastActionIds: [79],
                 },
                 '1': {
                     numOfPotionsBrewed: 0,
                     ingredients: [1, 3, 3, 3],
                     score: 0,
-                    learnedCastActionIds: ['81', '82'],
-                    availableCastActionIds: ['81'],
+                    learnedCastActionIds: [81, 82],
+                    availableCastActionIds: [81],
                 },
             },
             availableActionConfigs: {
@@ -546,8 +546,8 @@ describe('applyPlayerActionIdsToGameState', () => {
                     repeatable: false,
                 },
             },
-            availableBrewActionIds: ['11', '22', '33', '44', '55'],
-            availableDefaultActionIds: ['999', '888'],
+            availableBrewActionIds: [11, 22, 33, 44, 55],
+            availableDefaultActionIds: [999, 888],
         });
     });
 });

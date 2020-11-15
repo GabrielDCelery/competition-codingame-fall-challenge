@@ -85,27 +85,25 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
         newGameState.availableActionConfigs[availableActionConfig.id] = availableActionConfig;
 
         if (availableActionConfig.type == ActionType.BREW) {
-            newGameState.availableBrewActionIds.push(`${availableActionConfig.id}`);
+            newGameState.availableBrewActionIds.push(availableActionConfig.id);
             continue;
         }
         if (availableActionConfig.type == ActionType.CAST) {
-            newGameState.players[PLAYER_ID_ME].learnedCastActionIds.push(
-                `${availableActionConfig.id}`
-            );
+            newGameState.players[PLAYER_ID_ME].learnedCastActionIds.push(availableActionConfig.id);
             if (availableActionConfig.castable) {
                 newGameState.players[PLAYER_ID_ME].availableCastActionIds.push(
-                    `${availableActionConfig.id}`
+                    availableActionConfig.id
                 );
             }
             continue;
         }
         if (availableActionConfig.type == ActionType.OPPONENT_CAST) {
             newGameState.players[PLAYER_ID_OPPONENT].learnedCastActionIds.push(
-                `${availableActionConfig.id}`
+                availableActionConfig.id
             );
             if (availableActionConfig.castable) {
                 newGameState.players[PLAYER_ID_OPPONENT].availableCastActionIds.push(
-                    `${availableActionConfig.id}`
+                    availableActionConfig.id
                 );
             }
             continue;
@@ -126,7 +124,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
 
     config.defaultActionConfigs.forEach(defaultActionConfig => {
         newGameState.availableActionConfigs[defaultActionConfig.id] = defaultActionConfig;
-        newGameState.availableDefaultActionIds.push(`${defaultActionConfig.id}`);
+        newGameState.availableDefaultActionIds.push(defaultActionConfig.id);
     });
 
     return newGameState;
@@ -153,7 +151,7 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
     });
 
     clonedState.availableActionConfigs = gameState.availableActionConfigs;
-    clonedState.availableBrewActionIds = gameState.availableBrewActionIds;
+    clonedState.availableBrewActionIds = [...gameState.availableBrewActionIds];
     clonedState.availableDefaultActionIds = gameState.availableDefaultActionIds;
 
     return clonedState;
