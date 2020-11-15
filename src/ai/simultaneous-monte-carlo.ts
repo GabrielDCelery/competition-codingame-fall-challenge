@@ -279,15 +279,17 @@ class SimultaneousMCSearch<TState> {
         const groupedWinrates: { [index: string]: number[] } = {};
 
         this.rootNode.children.forEach(child => {
-            const winPercentage = child.valueSums[0] / child.visitCount;
             if (child.playerActionIds === null) {
                 return;
             }
+
             const playerActionId = child.playerActionIds[0];
 
             if (!groupedWinrates[playerActionId]) {
                 groupedWinrates[playerActionId] = [];
             }
+
+            const winPercentage = child.valueSums[0] / child.visitCount;
 
             groupedWinrates[playerActionId].push(winPercentage);
         });
