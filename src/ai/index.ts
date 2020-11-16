@@ -7,6 +7,7 @@ import {
     cloneGameState,
     scoreGameState,
 } from '../utils';
+/*
 import MonteCarlo, {
     ValidPlayerActionIdPairsGetter,
     PlayerActionsToGameStateApplier,
@@ -14,6 +15,14 @@ import MonteCarlo, {
     TerminalStateChecker,
     GameStateCloner,
 } from './simultaneous-monte-carlo';
+*/
+import MonteCarlo, {
+    ValidPlayerActionIdPairsGetter,
+    PlayerActionsToGameStateApplier,
+    OutcomeValuesGetter,
+    TerminalStateChecker,
+    GameStateCloner,
+} from './simultaneous-monte-carlo-efficient';
 
 const mcGetValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<GameState> = ({
     gameState,

@@ -119,7 +119,11 @@ const getValidActionsForPlayer = ({
     gameState: GameState;
     playerId: string;
 }): number[] => {
-    const validBrewActions = gameState.availableBrewActionIds.filter(playerActionId => {
+    const validActionIds: number[] = [
+        ...gameState.availableBrewActionIds,
+        ...gameState.players[playerId].availableCastActionIds,
+        ...gameState.availableDefaultActionIds,
+    ].filter(playerActionId => {
         return isPlayerActionValid({
             gameState,
             playerActionId,
@@ -127,27 +131,7 @@ const getValidActionsForPlayer = ({
         });
     });
 
-    const validCastActions = gameState.players[playerId].availableCastActionIds.filter(
-        playerActionId => {
-            return isPlayerActionValid({
-                gameState,
-                playerActionId,
-                playerId,
-            });
-        }
-    );
-
-    const validDefaultActions = gameState.availableDefaultActionIds.filter(playerActionId => {
-        return isPlayerActionValid({
-            gameState,
-            playerActionId,
-            playerId,
-        });
-    });
-
-    const validActions = [...validBrewActions, ...validCastActions, ...validDefaultActions];
-
-    return validActions.length === 0 ? gameState.availableDefaultActionIds : validActions;
+    return validActionIds.length === 0 ? gameState.availableDefaultActionIds : validActionIds;
 };
 
 export const getValidPlayerActionIdPairsForTurn = ({
