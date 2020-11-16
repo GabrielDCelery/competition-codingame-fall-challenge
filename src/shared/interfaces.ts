@@ -19,13 +19,14 @@ export interface PlayerActionConfig {
     repeatable: boolean;
 }
 
+export interface AvailablePlayerActionConfigs {
+    [index: string]: PlayerActionConfig;
+}
+
 export interface GameState {
     roundId: number;
     players: {
         [index: string]: PlayerState;
-    };
-    availableActionConfigs: {
-        [index: string]: PlayerActionConfig;
     };
     availableBrewActionIds: number[];
     availableDefaultActionIds: number[];

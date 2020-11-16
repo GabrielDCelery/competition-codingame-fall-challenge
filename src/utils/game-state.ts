@@ -1,6 +1,7 @@
 import config from '../game-config';
 import { PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../game-config';
 import { GameState, ActionType } from '../shared';
+import apac from './available-player-action-configs';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const readline: any;
@@ -28,18 +29,19 @@ export const createInitialGameState = (): GameState => {
                 availableCastActionIds: [],
             },
         },
-        availableActionConfigs: {},
         availableBrewActionIds: [],
         availableDefaultActionIds: [],
         //  avaliableLearnActionIds: [],
     };
+
+    apac.reset();
 
     return gameState;
 };
 
 export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState => {
     const newGameState: GameState = {
-        roundId: oldGameState.roundId,
+        roundId: oldGameState.roundId + 1,
         players: {
             [PLAYER_ID_ME]: {
                 numOfPotionsBrewed: oldGameState.players[PLAYER_ID_ME].numOfPotionsBrewed,
@@ -58,13 +60,21 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
                 availableCastActionIds: [],
             },
         },
-        availableActionConfigs: {},
         availableBrewActionIds: [],
         availableDefaultActionIds: [],
         // avaliableLearnActionIds: [],
     };
 
+    apac.reset();
+
+    config.defaultActionConfigs.forEach(defaultActionConfig => {
+        apac.addConfig(defaultActionConfig);
+        newGameState.availableDefaultActionIds.push(defaultActionConfig.id);
+    });
+
     const actionCount = parseInt(readNextLine());
+
+    // console.error(`acountCount - ${actionCount}`);
 
     for (let i = 0; i < actionCount; i++) {
         const inputs = readNextLine().split(' ');
@@ -84,7 +94,8 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
             castable: inputs[9] !== '0',
             repeatable: inputs[10] !== '0',
         };
-        newGameState.availableActionConfigs[availableActionConfig.id] = availableActionConfig;
+
+        apac.addConfig(availableActionConfig);
 
         if (availableActionConfig.type == ActionType.BREW) {
             newGameState.availableBrewActionIds.push(availableActionConfig.id);
@@ -127,13 +138,11 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
             parseInt(inputs[2]),
             parseInt(inputs[3]),
         ];
-        newGameState.players[i].score = parseInt(inputs[4]);
+        const newScore = parseInt(inputs[4]);
+        const didBrewPotionLastTurn = oldGameState.players[i].score < newScore;
+        newGameState.players[i].numOfPotionsBrewed += didBrewPotionLastTurn ? 1 : 0;
+        newGameState.players[i].score = newScore;
     }
-
-    config.defaultActionConfigs.forEach(defaultActionConfig => {
-        newGameState.availableActionConfigs[defaultActionConfig.id] = defaultActionConfig;
-        newGameState.availableDefaultActionIds.push(defaultActionConfig.id);
-    });
 
     return newGameState;
 };
@@ -142,7 +151,6 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
     const clonedState: GameState = {
         roundId: gameState.roundId,
         players: {},
-        availableActionConfigs: {},
         availableBrewActionIds: [],
         availableDefaultActionIds: [],
         // avaliableLearnActionIds: [],
@@ -159,9 +167,8 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
         };
     });
 
-    clonedState.availableActionConfigs = gameState.availableActionConfigs;
     clonedState.availableBrewActionIds = [...gameState.availableBrewActionIds];
-    clonedState.availableDefaultActionIds = gameState.availableDefaultActionIds;
+    clonedState.availableDefaultActionIds = [...gameState.availableDefaultActionIds];
     //   clonedState.avaliableLearnActionIds = [...gameState.avaliableLearnActionIds];
 
     return clonedState;

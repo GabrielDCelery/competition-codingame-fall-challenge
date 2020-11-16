@@ -1,6 +1,7 @@
 import { PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../game-config';
 import { ActionType, GameState, PlayerActionConfig } from '../shared';
 import { cloneGameState } from './game-state';
+import apac from './available-player-action-configs';
 
 const applyBrewPlayerActionToGameState = ({
     gameState,
@@ -81,9 +82,9 @@ export const applyPlayerActionToGameState = ({
     playerActionId: number;
     playerId: string;
 }): GameState => {
-    const playerAction = gameState.availableActionConfigs[playerActionId];
+    const playerAction = apac.state[playerActionId];
     if (!playerAction) {
-        throw new Error(`Not valid action id -> ${playerActionId}`);
+        throw new Error(`applyPlayerActionToGameState - Not valid action id -> ${playerActionId}`);
     }
     switch (playerAction.type) {
         case ActionType.BREW: {

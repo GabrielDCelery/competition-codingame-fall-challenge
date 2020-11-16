@@ -1,5 +1,3 @@
-// import { joinPlayerActionIds } from '../utils';
-
 export type ValidPlayerActionIdPairsGetter<TState> = ({
     gameState,
 }: {
@@ -289,14 +287,19 @@ class SimultaneousMCSearch<TState> {
                 groupedWinrates[playerActionId] = [];
             }
 
-            const winPercentage = child.valueSums[0] / child.visitCount;
+            const winPercentage =
+                child.visitCount === 0 ? 0 : child.valueSums[0] / child.visitCount;
 
             groupedWinrates[playerActionId].push(winPercentage);
         });
 
+        // console.error(groupedWinrates);
+
         const playerActionIds = Object.keys(groupedWinrates);
         let chosenActionId = -1;
-        let chosenActionWinPercentage = 0;
+        let chosenActionWinPercentage = -1;
+
+        //  console.error(groupedWinrates);
 
         playerActionIds.forEach(key => {
             const winPercentage =

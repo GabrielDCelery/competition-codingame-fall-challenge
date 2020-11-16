@@ -1,5 +1,6 @@
 import config, { PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../game-config';
 import { ActionType, GameState, PlayerActionConfig } from '../shared';
+import apac from './available-player-action-configs';
 
 const isBrewPlayerActionValid = ({
     gameState,
@@ -77,9 +78,9 @@ const isPlayerActionValid = ({
     playerActionId: number;
     playerId: string;
 }): boolean => {
-    const playerAction = gameState.availableActionConfigs[playerActionId];
+    const playerAction = apac.state[playerActionId];
     if (!playerAction) {
-        throw new Error(`Not valid action id -> ${playerActionId}`);
+        throw new Error(`isPlayerActionValid - Not valid action id -> ${playerActionId}`);
     }
     const { type } = playerAction;
     switch (type) {

@@ -1,15 +1,16 @@
 import { ActionType, GameState } from '../shared';
+import apac from './available-player-action-configs';
 
 export const createActionForGameLoop = ({
-    gameState,
+    // gameState,
     playerActionId,
 }: {
     gameState: GameState;
     playerActionId: number;
 }): string => {
-    const playerAction = gameState.availableActionConfigs[playerActionId];
+    const playerAction = apac.state[playerActionId];
     if (!playerAction) {
-        throw new Error(`Not valid action id -> ${playerActionId}`);
+        throw new Error(`createActionForGameLoop - Not valid action id -> ${playerActionId}`);
     }
     const { type, id } = playerAction;
     switch (type) {

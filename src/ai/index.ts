@@ -1,4 +1,4 @@
-import gameConfig, { RESPONSE_TIME_IN_TURNS_MS } from '../game-config';
+import gameConfig from '../game-config';
 import { GameState } from '../shared';
 import {
     applyPlayerActionIdsToGameState,
@@ -66,7 +66,7 @@ export const choosePlayerActionId = ({
     const mc = new MonteCarlo<GameState>({
         startState: gameState,
         numOfMaxIterations: gameConfig.monteCarlo.numOfMaxIterations,
-        maxTimetoSpend: RESPONSE_TIME_IN_TURNS_MS - 10,
+        maxTimetoSpend: gameConfig.monteCarlo.maxTimetoSpendInMs,
         maxRolloutSteps: gameConfig.monteCarlo.maxRolloutSteps,
         cConst: gameConfig.monteCarlo.cConst,
         getValidPlayerActionIdPairs: mcGetValidPlayerActionIdPairs,
