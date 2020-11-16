@@ -29,4 +29,5 @@ export interface GameState {
     };
     availableBrewActionIds: number[];
     availableDefaultActionIds: number[];
+    //  avaliableLearnActionIds: number[];
 }

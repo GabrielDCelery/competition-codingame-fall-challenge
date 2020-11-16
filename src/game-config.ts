@@ -25,7 +25,7 @@ const configs: { [index: string]: LeagueConfig } = {
         monteCarlo: {
             numOfMaxIterations: 10000,
             cConst: 2,
-            maxRolloutSteps: 5,
+            maxRolloutSteps: 3,
             unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
         },
         defaultActionConfigs: [
@@ -41,6 +41,28 @@ const configs: { [index: string]: LeagueConfig } = {
                 repeatable: false,
             },
             */
+            {
+                id: 888,
+                type: ActionType.REST,
+                deltas: [0, 0, 0, 0],
+                price: 0,
+                tomeIndex: 0,
+                taxCount: 0,
+                castable: false,
+                repeatable: false,
+            },
+        ],
+    },
+    [League.Bronze]: {
+        numOfPotionsToBrewToWin: 6,
+        maxInventorySize: 10,
+        monteCarlo: {
+            numOfMaxIterations: 10000,
+            cConst: 2,
+            maxRolloutSteps: 5,
+            unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+        },
+        defaultActionConfigs: [
             {
                 id: 888,
                 type: ActionType.REST,

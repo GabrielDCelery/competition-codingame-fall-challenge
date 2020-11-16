@@ -9,4 +9,5 @@ export enum ActionType {
 
 export enum League {
     Wood1,
+    Bronze,
 }
