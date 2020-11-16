@@ -63,7 +63,7 @@ const configs: { [index: string]: LeagueConfig } = {
             maxTimetoSpendInMs: 45,
             cConst: 2,
             maxRolloutSteps: 4,
-            unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+            unusedIngredientScoreWeights: [0.2, 0.4, 0.4, 0.4],
         },
         defaultActionConfigs: [
             {

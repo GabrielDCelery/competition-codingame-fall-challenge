@@ -12,8 +12,7 @@ const isBrewPlayerActionValid = ({
     playerId: string;
 }): boolean => {
     for (let i = 0, iMax = playerAction.deltas.length; i < iMax; i++) {
-        const newIngredient = gameState.players[playerId].ingredients[i] + playerAction.deltas[i];
-        if (newIngredient < 0) {
+        if (gameState.players[playerId].ingredients[i] + playerAction.deltas[i] < 0) {
             return false;
         }
     }
@@ -43,26 +42,17 @@ const isCastPlayerActionValid = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): boolean => {
-    const player = gameState.players[playerId];
-    const canCast = player.availableCastActionIds.includes(playerAction.id);
-
-    if (!canCast) {
-        return false;
-    }
-
-    const newIngredients: number[] = [];
+    let inventorySizeAfterCast = 0;
 
     for (let i = 0, iMax = playerAction.deltas.length; i < iMax; i++) {
         const newIngredient = gameState.players[playerId].ingredients[i] + playerAction.deltas[i];
         if (newIngredient < 0) {
             return false;
         }
-        newIngredients.push(newIngredient);
+        inventorySizeAfterCast += newIngredient;
     }
 
-    const doesExceedInventory = config.maxInventorySize < newIngredients.reduce((a, b) => a + b, 0);
-
-    if (doesExceedInventory) {
+    if (config.maxInventorySize < inventorySizeAfterCast) {
         return false;
     }
 
