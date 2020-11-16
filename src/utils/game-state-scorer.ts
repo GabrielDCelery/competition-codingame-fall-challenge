@@ -1,5 +1,51 @@
 import gameConfig, { PLAYER_ID_ME, PLAYER_ID_OPPONENT, INGREDIENT_VALUES } from '../game-config';
 import { GameState } from '../shared';
+import apac from './available-player-action-configs';
+
+const spellValue = (deltas: number[]): number => {
+    let cost;
+    let generated = deltas.forEach((delta, index) => {
+        diffGenerated += delta * INGREDIENT_VALUES[index];
+    });
+    return 1;
+};
+
+const scoreLearnedSpells = ({
+    initialState,
+    currentState,
+    playerId,
+}: {
+    initialState: GameState;
+    currentState: GameState;
+    playerId: string;
+}): number => {
+    if (
+        currentState.players[playerId].learnedCastActionIds ===
+        initialState.players[playerId].learnedCastActionIds
+    ) {
+        return 0;
+    }
+
+    return totalScore;
+};
+
+const getPotionIngredientDistribution = ({
+    gameState,
+}: {
+    gameState: GameState;
+}): { ingredients: number[]; total: number } => {
+    let total = 0;
+    const ingredients = [0, 0, 0, 0];
+
+    gameState.availableBrewActionIds.forEach(actionId => {
+        apac.state[actionId].deltas.forEach((delta, index) => {
+            total += delta;
+            ingredients[index] += delta;
+        });
+    });
+
+    return { ingredients, total };
+};
 
 const scoreUnusedIngredients = ({
     gameState,

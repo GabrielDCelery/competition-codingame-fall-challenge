@@ -59,6 +59,18 @@ const isCastPlayerActionValid = ({
     return true;
 };
 
+const isLearnPlayerActionValid = ({
+    gameState,
+    playerAction,
+    playerId,
+}: {
+    gameState: GameState;
+    playerAction: PlayerActionConfig;
+    playerId: string;
+}): boolean => {
+    return playerAction.tomeIndex <= gameState.players[playerId].ingredients[0];
+};
+
 const isPlayerActionValid = ({
     gameState,
     playerActionId,
@@ -83,6 +95,13 @@ const isPlayerActionValid = ({
         }
         case ActionType.OPPONENT_CAST: {
             return isCastPlayerActionValid({
+                gameState,
+                playerAction,
+                playerId,
+            });
+        }
+        case ActionType.LEARN: {
+            return isLearnPlayerActionValid({
                 gameState,
                 playerAction,
                 playerId,

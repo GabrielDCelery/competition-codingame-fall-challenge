@@ -14,6 +14,8 @@ interface LeagueConfig {
         maxTimetoSpendInMs: number;
         cConst: number;
         maxRolloutSteps: number;
+        spellCastNegativeWeights: number[];
+        spellCastPositiveWeights: number[];
         unusedIngredientScoreWeights: number[];
     };
     defaultActionConfigs: PlayerActionConfig[];
@@ -28,6 +30,8 @@ const configs: { [index: string]: LeagueConfig } = {
             maxTimetoSpendInMs: 20,
             cConst: 2,
             maxRolloutSteps: 5,
+            spellCastNegativeWeights: [0.1, 0.3, 0.5, 0.7],
+            spellCastPositiveWeights: [0.1, 0.3, 0.5, 0.7],
             unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
         },
         defaultActionConfigs: [

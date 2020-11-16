@@ -35,6 +35,25 @@ const applyRestPlayerActionToGameState = ({
     ];
 };
 
+const applyLearnPlayerActionToGameState = ({
+    gameState,
+    playerAction,
+    playerId,
+}: {
+    gameState: GameState;
+    playerAction: PlayerActionConfig;
+    playerId: string;
+}): void => {
+    gameState.players[playerId].ingredients[0] -= playerAction.tomeIndex;
+    gameState.players[playerId].learnedCastActionIds = [
+        ...gameState.players[playerId].learnedCastActionIds,
+        playerAction.id,
+    ];
+    gameState.avaliableLearnActionIds = gameState.avaliableLearnActionIds.filter(item => {
+        return item !== playerAction.id;
+    });
+};
+
 const applyCastPlayerActionToGameState = ({
     gameState,
     playerAction,
@@ -85,6 +104,13 @@ export const applyPlayerActionToGameState = ({
         }
         case ActionType.OPPONENT_CAST: {
             return applyCastPlayerActionToGameState({
+                gameState,
+                playerAction,
+                playerId,
+            });
+        }
+        case ActionType.LEARN: {
+            return applyLearnPlayerActionToGameState({
                 gameState,
                 playerAction,
                 playerId,

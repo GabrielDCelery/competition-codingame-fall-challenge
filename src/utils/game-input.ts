@@ -48,6 +48,9 @@ export const createActionForGameLoop = ({
         case ActionType.REST: {
             return `${getActionType(type)}`;
         }
+        case ActionType.LEARN: {
+            return `${getActionType(type)}`;
+        }
         case ActionType.WAIT: {
             return `${getActionType(type)}`;
         }

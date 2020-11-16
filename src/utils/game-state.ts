@@ -31,7 +31,7 @@ export const createInitialGameState = (): GameState => {
         },
         availableBrewActionIds: [],
         availableDefaultActionIds: [],
-        //  avaliableLearnActionIds: [],
+        avaliableLearnActionIds: [],
     };
 
     apac.reset();
@@ -87,7 +87,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
         },
         availableBrewActionIds: [],
         availableDefaultActionIds: [],
-        // avaliableLearnActionIds: [],
+        avaliableLearnActionIds: [],
     };
 
     apac.reset();
@@ -146,12 +146,11 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
             }
             continue;
         }
-        /*
+
         if (availableActionConfig.type == ActionType.LEARN) {
             newGameState.avaliableLearnActionIds.push(availableActionConfig.id);
             continue;
         }
-        */
     }
 
     for (let i = 0; i < 2; i++) {
@@ -178,7 +177,7 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
         players: {},
         availableBrewActionIds: [],
         availableDefaultActionIds: [],
-        // avaliableLearnActionIds: [],
+        avaliableLearnActionIds: [],
     };
 
     [PLAYER_ID_ME, PLAYER_ID_OPPONENT].forEach(playerId => {
@@ -194,7 +193,7 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
 
     clonedState.availableBrewActionIds = [...gameState.availableBrewActionIds];
     clonedState.availableDefaultActionIds = [...gameState.availableDefaultActionIds];
-    //   clonedState.avaliableLearnActionIds = [...gameState.avaliableLearnActionIds];
+    clonedState.avaliableLearnActionIds = [...gameState.avaliableLearnActionIds];
 
     return clonedState;
 };
