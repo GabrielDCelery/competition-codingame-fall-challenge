@@ -92,21 +92,6 @@ class SimultaneousMCSearchSimulator<TState> {
         };
     }
 
-    hasBeenVisited(node: MCNode): boolean {
-        return node.visitCount > 0;
-    }
-
-    isLeafNode(node: MCNode): boolean {
-        return node.children.length === 0;
-    }
-
-    getValue({ playerIndex, node }: { playerIndex: number; node: MCNode }): number {
-        if (node.visitCount === 0) {
-            return Infinity;
-        }
-        return node.valueSums[playerIndex] / node.visitCount;
-    }
-
     getMaxUCBChildIndex({
         node,
         gameState,
@@ -125,7 +110,7 @@ class SimultaneousMCSearchSimulator<TState> {
             const nodeUCBValue =
                 child.visitCount === 0
                     ? Infinity
-                    : this.getValue({ node: child, playerIndex: playerRunningTheSimulation }) +
+                    : child.valueSums[playerRunningTheSimulation] / child.visitCount +
                       cConst * Math.sqrt(Math.log(node.visitCount) / child.visitCount);
 
             if (chosenNodeValue < nodeUCBValue) {
@@ -158,7 +143,7 @@ class SimultaneousMCSearchSimulator<TState> {
         playerRunningTheSimulation: number;
     }): MCNode {
         let currentNode = startFromNode;
-        while (!this.isLeafNode(currentNode)) {
+        while (currentNode.children.length !== 0) {
             const chosenChildIndex = this.getMaxUCBChildIndex({
                 node: currentNode,
                 gameState,
@@ -252,7 +237,7 @@ class SimultaneousMCSearchSimulator<TState> {
             groupedWinrates[playerActionId].push(winPercentage);
         });
 
-        // console.error(groupedWinrates);
+        //  console.error(groupedWinrates);
 
         const playerActionIds = Object.keys(groupedWinrates);
         let chosenActionId = -1;
@@ -314,7 +299,7 @@ class SimultaneousMCSearchSimulator<TState> {
                 currentState: analyzedState,
             });
 
-            if (this.hasBeenVisited(this.pointer) && !isTerminalState) {
+            if (this.pointer.visitCount > 0 && !isTerminalState) {
                 this.applyLeafNodesToNode({ node: this.pointer, gameState: analyzedState });
                 this.pointer = this.traverse({
                     gameState: analyzedState,
