@@ -23,14 +23,14 @@ const scoreUnusedIngredients = ({
 export const scoreGameState = ({
     isTerminalState,
     // initialState,
-    terminalState,
+    currentState,
 }: {
     isTerminalState?: boolean;
     initialState: GameState;
-    terminalState: GameState;
+    currentState: GameState;
 }): number[] => {
     const playerIds = [PLAYER_ID_ME, PLAYER_ID_OPPONENT];
-    const brewScores = playerIds.map(playerId => terminalState.players[playerId].score);
+    const brewScores = playerIds.map(playerId => currentState.players[playerId].score);
 
     if (isTerminalState) {
         if (brewScores[0] === brewScores[1]) {
@@ -45,7 +45,7 @@ export const scoreGameState = ({
     }
 
     const ingredientScores = playerIds.map(playerId => {
-        return scoreUnusedIngredients({ gameState: terminalState, playerId });
+        return scoreUnusedIngredients({ gameState: currentState, playerId });
     });
 
     const playerScores = [brewScores[0] + ingredientScores[0], brewScores[1] + ingredientScores[1]];

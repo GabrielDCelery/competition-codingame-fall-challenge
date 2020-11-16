@@ -25,21 +25,18 @@ const mcApplyPlayerActionsToGameState: PlayerActionsToGameStateApplier<GameState
     gameState,
     playerActionIds,
 }) => {
-    return applyPlayerActionIdsToGameState({
-        gameState,
-        playerActionIds,
-    });
+    applyPlayerActionIdsToGameState({ gameState, playerActionIds });
 };
 
 const mcGetOutcomeValues: OutcomeValuesGetter<GameState> = ({
     isTerminalState,
     initialState,
-    terminalState,
+    currentState,
 }) => {
     return scoreGameState({
         isTerminalState,
         initialState,
-        terminalState,
+        currentState,
     });
 };
 
@@ -64,7 +61,6 @@ export const choosePlayerActionId = ({
     playerId: string;
 }): number => {
     const mc = new MonteCarlo<GameState>({
-        startState: gameState,
         numOfMaxIterations: gameConfig.monteCarlo.numOfMaxIterations,
         maxTimetoSpend: gameConfig.monteCarlo.maxTimetoSpendInMs,
         maxRolloutSteps: gameConfig.monteCarlo.maxRolloutSteps,
@@ -75,6 +71,6 @@ export const choosePlayerActionId = ({
         checkIfTerminalState: mcCheckIfTerminalState,
         cloneGameState: mcCloneGameState,
     });
-    const chosenActionId = mc.run();
+    const chosenActionId = mc.run({ gameState });
     return chosenActionId;
 };

@@ -60,9 +60,9 @@ const configs: { [index: string]: LeagueConfig } = {
         maxInventorySize: 10,
         monteCarlo: {
             numOfMaxIterations: 10000,
-            maxTimetoSpendInMs: 20,
+            maxTimetoSpendInMs: 45,
             cConst: 2,
-            maxRolloutSteps: 3,
+            maxRolloutSteps: 5,
             unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
         },
         defaultActionConfigs: [

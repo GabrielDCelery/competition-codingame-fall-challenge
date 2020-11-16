@@ -1,6 +1,5 @@
 import { PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../game-config';
 import { ActionType, GameState, PlayerActionConfig } from '../shared';
-import { cloneGameState } from './game-state';
 import apac from './available-player-action-configs';
 
 const applyBrewPlayerActionToGameState = ({
@@ -11,18 +10,15 @@ const applyBrewPlayerActionToGameState = ({
     gameState: GameState;
     playerAction: PlayerActionConfig;
     playerId: string;
-}): GameState => {
-    const newGameState = cloneGameState({ gameState });
-    newGameState.players[playerId].numOfPotionsBrewed += 1;
-    const newPlayerIngredients = playerAction.deltas.map((delta, index) => {
-        return gameState.players[playerId].ingredients[index] + delta;
+}): void => {
+    playerAction.deltas.forEach((delta, index) => {
+        gameState.players[playerId].ingredients[index] += delta;
     });
-    newGameState.players[playerId].ingredients = newPlayerIngredients;
-    newGameState.players[playerId].score += playerAction.price;
-    newGameState.availableBrewActionIds = newGameState.availableBrewActionIds.filter(item => {
+    gameState.players[playerId].numOfPotionsBrewed += 1;
+    gameState.players[playerId].score += playerAction.price;
+    gameState.availableBrewActionIds = gameState.availableBrewActionIds.filter(item => {
         return item !== playerAction.id;
     });
-    return newGameState;
 };
 
 const applyRestPlayerActionToGameState = ({
@@ -33,12 +29,10 @@ const applyRestPlayerActionToGameState = ({
     gameState: GameState;
     playerAction: PlayerActionConfig;
     playerId: string;
-}): GameState => {
-    const newGameState = cloneGameState({ gameState });
-    newGameState.players[playerId].availableCastActionIds = [
-        ...newGameState.players[playerId].learnedCastActionIds,
+}): void => {
+    gameState.players[playerId].availableCastActionIds = [
+        ...gameState.players[playerId].learnedCastActionIds,
     ];
-    return newGameState;
 };
 
 const applyCastPlayerActionToGameState = ({
@@ -49,28 +43,23 @@ const applyCastPlayerActionToGameState = ({
     gameState: GameState;
     playerAction: PlayerActionConfig;
     playerId: string;
-}): GameState => {
-    const newGameState = cloneGameState({ gameState });
-    const newPlayerIngredients = playerAction.deltas.map((delta, index) => {
-        return gameState.players[playerId].ingredients[index] + delta;
+}): void => {
+    playerAction.deltas.forEach((delta, index) => {
+        gameState.players[playerId].ingredients[index] += delta;
     });
-    newGameState.players[playerId].ingredients = newPlayerIngredients;
-    newGameState.players[playerId].availableCastActionIds = newGameState.players[
+    gameState.players[playerId].availableCastActionIds = gameState.players[
         playerId
     ].availableCastActionIds.filter(item => {
         return item !== playerAction.id;
     });
-    return newGameState;
 };
 
-const applyWaitPlayerActionToGameState = ({
-    gameState,
-}: {
+const applyWaitPlayerActionToGameState = ({}: {
     gameState: GameState;
     playerAction: PlayerActionConfig;
     playerId: string;
-}): GameState => {
-    return cloneGameState({ gameState });
+}): void => {
+    return;
 };
 
 export const applyPlayerActionToGameState = ({
@@ -81,7 +70,7 @@ export const applyPlayerActionToGameState = ({
     gameState: GameState;
     playerActionId: number;
     playerId: string;
-}): GameState => {
+}): void => {
     const playerAction = apac.state[playerActionId];
     if (!playerAction) {
         throw new Error(`applyPlayerActionToGameState - Not valid action id -> ${playerActionId}`);
@@ -133,19 +122,16 @@ export const applyPlayerActionIdsToGameState = ({
 }: {
     gameState: GameState;
     playerActionIds: number[];
-}): GameState => {
-    let newGameState = cloneGameState({ gameState });
+}): void => {
     const playerIds = [PLAYER_ID_ME, PLAYER_ID_OPPONENT];
 
     playerActionIds.forEach((playerActionId, index) => {
-        newGameState = applyPlayerActionToGameState({
-            gameState: newGameState,
+        applyPlayerActionToGameState({
+            gameState,
             playerActionId,
             playerId: playerIds[index],
         });
     });
 
-    newGameState.roundId += 1;
-
-    return newGameState;
+    gameState.roundId += 1;
 };

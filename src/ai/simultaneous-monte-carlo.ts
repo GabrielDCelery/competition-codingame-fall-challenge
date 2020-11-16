@@ -10,7 +10,7 @@ export type PlayerActionsToGameStateApplier<TState> = ({
 }: {
     gameState: TState;
     playerActionIds: number[];
-}) => TState;
+}) => void;
 
 export type TerminalStateChecker<TState> = ({
     initialState,
@@ -23,11 +23,11 @@ export type TerminalStateChecker<TState> = ({
 export type OutcomeValuesGetter<TState> = ({
     isTerminalState,
     initialState,
-    terminalState,
+    currentState,
 }: {
     isTerminalState?: boolean;
     initialState: TState;
-    terminalState: TState;
+    currentState: TState;
 }) => number[];
 
 export type GameStateCloner<TState> = ({ gameState }: { gameState: TState }) => TState;
@@ -37,28 +37,32 @@ class MCNode<TState> {
     children: MCNode<TState>[];
     visitCount: number;
     playerActionIds: number[] | null;
-    gameState: TState;
     valueSums: number[];
     cloneGameState: GameStateCloner<TState>;
+    applyPlayerActionsToGameState: PlayerActionsToGameStateApplier<TState>;
+    getValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<TState>;
 
     constructor({
         parent,
         playerActionIds,
-        gameState,
         cloneGameState,
+        applyPlayerActionsToGameState,
+        getValidPlayerActionIdPairs,
     }: {
         parent: MCNode<TState> | null;
         playerActionIds: number[] | null;
-        gameState: TState;
         cloneGameState: GameStateCloner<TState>;
+        applyPlayerActionsToGameState: PlayerActionsToGameStateApplier<TState>;
+        getValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<TState>;
     }) {
         this.parent = parent;
         this.children = [];
         this.visitCount = 0;
         this.playerActionIds = playerActionIds;
-        this.gameState = gameState;
         this.valueSums = [0, 0];
         this.cloneGameState = cloneGameState;
+        this.applyPlayerActionsToGameState = applyPlayerActionsToGameState;
+        this.getValidPlayerActionIdPairs = getValidPlayerActionIdPairs;
     }
 
     getValue({ playerIndex }: { playerIndex: number }): number {
@@ -76,26 +80,16 @@ class MCNode<TState> {
         return this.visitCount > 0;
     }
 
-    applyLeafNodes({
-        getValidPlayerActionIdPairs,
-        applyPlayerActionsToGameState,
-    }: {
-        getValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<TState>;
-        applyPlayerActionsToGameState: PlayerActionsToGameStateApplier<TState>;
-    }): void {
-        const validPlayerActionIdPairs = getValidPlayerActionIdPairs({
-            gameState: this.gameState,
-        });
+    applyLeafNodes({ gameState }: { gameState: TState }): void {
+        const validPlayerActionIdPairs = this.getValidPlayerActionIdPairs({ gameState });
 
-        validPlayerActionIdPairs.forEach((validPlayerActionIdPair /*, index */) => {
+        validPlayerActionIdPairs.forEach(validPlayerActionIdPair => {
             const child = new MCNode({
                 parent: this,
                 playerActionIds: validPlayerActionIdPair,
-                gameState: applyPlayerActionsToGameState({
-                    gameState: this.gameState,
-                    playerActionIds: validPlayerActionIdPair,
-                }),
                 cloneGameState: this.cloneGameState,
+                applyPlayerActionsToGameState: this.applyPlayerActionsToGameState,
+                getValidPlayerActionIdPairs: this.getValidPlayerActionIdPairs,
             });
 
             this.children.push(child);
@@ -103,9 +97,11 @@ class MCNode<TState> {
     }
 
     getMaxUCBNode({
+        gameState,
         cConst,
         playerRunningTheSimulation,
     }: {
+        gameState: TState;
         cConst: number;
         playerRunningTheSimulation: number;
     }): MCNode<TState> {
@@ -125,16 +121,18 @@ class MCNode<TState> {
             }
         });
 
-        return this.children[chosenNodeIndex];
-    }
+        const chosenChild = this.children[chosenNodeIndex];
 
-    clone(): MCNode<TState> {
-        return new MCNode({
-            parent: this.parent,
-            playerActionIds: this.playerActionIds,
-            gameState: this.cloneGameState({ gameState: this.gameState }),
-            cloneGameState: this.cloneGameState,
+        if (chosenChild.playerActionIds === null) {
+            throw new Error(`Accessing null`);
+        }
+
+        this.applyPlayerActionsToGameState({
+            gameState,
+            playerActionIds: chosenChild.playerActionIds,
         });
+
+        return this.children[chosenNodeIndex];
     }
 }
 
@@ -151,7 +149,6 @@ class SimultaneousMCSearch<TState> {
     cloneGameState: GameStateCloner<TState>;
 
     constructor({
-        startState,
         numOfMaxIterations,
         maxTimetoSpend,
         cConst,
@@ -162,7 +159,6 @@ class SimultaneousMCSearch<TState> {
         checkIfTerminalState,
         cloneGameState,
     }: {
-        startState: TState;
         numOfMaxIterations: number;
         maxTimetoSpend: number;
         cConst: number;
@@ -185,26 +181,26 @@ class SimultaneousMCSearch<TState> {
 
         this.rootNode = new MCNode<TState>({
             parent: null,
-            gameState: startState,
             playerActionIds: null,
             cloneGameState: this.cloneGameState,
-        });
-        this.rootNode.applyLeafNodes({
             getValidPlayerActionIdPairs: this.getValidPlayerActionIdPairs,
             applyPlayerActionsToGameState: this.applyPlayerActionsToGameState,
         });
     }
 
     traverse({
+        gameState,
         startFromNode,
         playerRunningTheSimulation,
     }: {
+        gameState: TState;
         startFromNode: MCNode<TState>;
         playerRunningTheSimulation: number;
     }): MCNode<TState> {
         let currentNode = startFromNode;
         while (!currentNode.isLeafNode()) {
             currentNode = currentNode.getMaxUCBNode({
+                gameState,
                 cConst: this.cConst,
                 playerRunningTheSimulation,
             });
@@ -212,37 +208,37 @@ class SimultaneousMCSearch<TState> {
         return currentNode;
     }
 
-    rollout(startFromNode: MCNode<TState>): number[] {
+    rollout({
+        initialState,
+        rolloutState,
+    }: {
+        initialState: TState;
+        rolloutState: TState;
+    }): number[] {
         let currentRolloutSteps = 0;
-        let currentNode = startFromNode.clone();
+
+        const currentState = this.cloneGameState({ gameState: rolloutState });
 
         while (true) {
             currentRolloutSteps += 1;
 
             const isTerminalState = this.checkIfTerminalState({
-                initialState: this.rootNode.gameState,
-                currentState: currentNode.gameState,
+                initialState,
+                currentState: rolloutState,
             });
 
             if (isTerminalState) {
-                return this.getOutcomeValues({
-                    isTerminalState: true,
-                    initialState: this.rootNode.gameState,
-                    terminalState: currentNode.gameState,
-                });
+                return this.getOutcomeValues({ isTerminalState: true, initialState, currentState });
             }
 
             const reachedMaximumRollout = this.maxRolloutSteps < currentRolloutSteps;
 
             if (reachedMaximumRollout) {
-                return this.getOutcomeValues({
-                    initialState: this.rootNode.gameState,
-                    terminalState: currentNode.gameState,
-                });
+                return this.getOutcomeValues({ initialState, currentState });
             }
 
             const validPlayerActionIdPairs = this.getValidPlayerActionIdPairs({
-                gameState: currentNode.gameState,
+                gameState: currentState,
             });
 
             const randomlyChosenActionIdPair =
@@ -250,27 +246,28 @@ class SimultaneousMCSearch<TState> {
                     Math.floor(Math.random() * validPlayerActionIdPairs.length)
                 ];
 
-            currentNode = new MCNode<TState>({
-                parent: currentNode,
+            this.applyPlayerActionsToGameState({
+                gameState: currentState,
                 playerActionIds: randomlyChosenActionIdPair,
-                gameState: this.applyPlayerActionsToGameState({
-                    gameState: currentNode.gameState,
-                    playerActionIds: randomlyChosenActionIdPair,
-                }),
-                cloneGameState: this.cloneGameState,
             });
         }
     }
 
-    backPropagate({ node, values }: { node: MCNode<TState>; values: number[] }): void {
+    backPropagate({
+        startFromNode,
+        values,
+    }: {
+        startFromNode: MCNode<TState>;
+        values: number[];
+    }): void {
         values.forEach((value, index) => {
-            node.valueSums[index] += value;
+            startFromNode.valueSums[index] += value;
         });
-        node.visitCount = node.visitCount + 1;
-        if (node.parent === null) {
+        startFromNode.visitCount = startFromNode.visitCount + 1;
+        if (startFromNode.parent === null) {
             return;
         }
-        this.backPropagate({ node: node.parent, values });
+        this.backPropagate({ startFromNode: startFromNode.parent, values });
     }
 
     chooseNextActionId(): number {
@@ -314,16 +311,22 @@ class SimultaneousMCSearch<TState> {
         return chosenActionId;
     }
 
-    run(): number {
+    run({ gameState }: { gameState: TState }): number {
         let numOfCurrentIterations = 0;
         const start = new Date().getTime();
         let playerRunningTheSimulation = 0;
+
+        this.rootNode.applyLeafNodes({ gameState });
+
         while (true) {
             if (this.maxTimetoSpend < new Date().getTime() - start) {
                 return this.chooseNextActionId();
             }
 
+            const analyzedState = this.cloneGameState({ gameState });
+
             let currentNode = this.traverse({
+                gameState: analyzedState,
                 startFromNode: this.rootNode,
                 playerRunningTheSimulation,
             });
@@ -333,16 +336,14 @@ class SimultaneousMCSearch<TState> {
             }
 
             const isTerminalState = this.checkIfTerminalState({
-                initialState: this.rootNode.gameState,
-                currentState: currentNode.gameState,
+                initialState: gameState,
+                currentState: analyzedState,
             });
 
             if (currentNode.hasBeenVisited() && !isTerminalState) {
-                currentNode.applyLeafNodes({
-                    getValidPlayerActionIdPairs: this.getValidPlayerActionIdPairs,
-                    applyPlayerActionsToGameState: this.applyPlayerActionsToGameState,
-                });
+                currentNode.applyLeafNodes({ gameState: analyzedState });
                 currentNode = this.traverse({
+                    gameState: analyzedState,
                     startFromNode: currentNode,
                     playerRunningTheSimulation,
                 });
@@ -352,13 +353,13 @@ class SimultaneousMCSearch<TState> {
                 return this.chooseNextActionId();
             }
 
-            const values = this.rollout(currentNode);
+            const values = this.rollout({ initialState: gameState, rolloutState: analyzedState });
 
             if (this.maxTimetoSpend < new Date().getTime() - start) {
                 return this.chooseNextActionId();
             }
 
-            this.backPropagate({ node: currentNode, values });
+            this.backPropagate({ startFromNode: currentNode, values });
 
             if (this.maxTimetoSpend < new Date().getTime() - start) {
                 return this.chooseNextActionId();

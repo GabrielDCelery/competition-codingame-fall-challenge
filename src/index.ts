@@ -11,12 +11,12 @@ try {
 
     while (true) {
         gameState = updateGameStateFromGameLoop(gameState);
-        const start = new Date().getTime();
+        // const start = new Date().getTime();
         const playerActionId = choosePlayerActionId({ gameState, playerId: PLAYER_ID_ME });
-        console.error(`choosePlayerActionId ${new Date().getTime() - start}`);
+        // console.error(`choosePlayerActionId ${new Date().getTime() - start}`);
         const gameLoopAction = createActionForGameLoop({ gameState, playerActionId });
-        console.error(`createActionForGameLoop ${new Date().getTime() - start}`);
-        console.error(`update internal state ${new Date().getTime() - start}`);
+        //   console.error(`createActionForGameLoop ${new Date().getTime() - start}`);
+        //  console.error(`update internal state ${new Date().getTime() - start}`);
         console.log(gameLoopAction);
     }
 } catch (error) {
