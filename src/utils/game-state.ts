@@ -39,6 +39,31 @@ export const createInitialGameState = (): GameState => {
     return gameState;
 };
 
+const getActionType = (gameInputActionType: string): ActionType => {
+    switch (gameInputActionType) {
+        case 'CAST': {
+            return ActionType.CAST;
+        }
+        case 'OPPONENT_CAST': {
+            return ActionType.OPPONENT_CAST;
+        }
+        case 'BREW': {
+            return ActionType.BREW;
+        }
+        case 'LEARN': {
+            return ActionType.LEARN;
+        }
+        case 'WAIT': {
+            return ActionType.WAIT;
+        }
+        case 'REST': {
+            return ActionType.REST;
+        }
+        default:
+            throw new Error(`Invalid action type -> ${gameInputActionType}`);
+    }
+};
+
 export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState => {
     const newGameState: GameState = {
         roundId: oldGameState.roundId + 1,
@@ -81,7 +106,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
         const id = parseInt(inputs[0]);
         const availableActionConfig = {
             id,
-            type: inputs[1] as ActionType,
+            type: getActionType(inputs[1]),
             deltas: [
                 parseInt(inputs[2]),
                 parseInt(inputs[3]),

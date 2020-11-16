@@ -53,7 +53,7 @@ const applyCastPlayerActionToGameState = ({
         return item !== playerAction.id;
     });
 };
-
+/*
 const applyWaitPlayerActionToGameState = ({}: {
     gameState: GameState;
     playerAction: PlayerActionConfig;
@@ -61,7 +61,7 @@ const applyWaitPlayerActionToGameState = ({}: {
 }): void => {
     return;
 };
-
+*/
 export const applyPlayerActionToGameState = ({
     gameState,
     playerActionId,
@@ -76,20 +76,6 @@ export const applyPlayerActionToGameState = ({
         throw new Error(`applyPlayerActionToGameState - Not valid action id -> ${playerActionId}`);
     }
     switch (playerAction.type) {
-        case ActionType.BREW: {
-            return applyBrewPlayerActionToGameState({
-                gameState,
-                playerAction,
-                playerId,
-            });
-        }
-        case ActionType.REST: {
-            return applyRestPlayerActionToGameState({
-                gameState,
-                playerAction,
-                playerId,
-            });
-        }
         case ActionType.CAST: {
             return applyCastPlayerActionToGameState({
                 gameState,
@@ -104,6 +90,21 @@ export const applyPlayerActionToGameState = ({
                 playerId,
             });
         }
+        case ActionType.REST: {
+            return applyRestPlayerActionToGameState({
+                gameState,
+                playerAction,
+                playerId,
+            });
+        }
+        case ActionType.BREW: {
+            return applyBrewPlayerActionToGameState({
+                gameState,
+                playerAction,
+                playerId,
+            });
+        }
+        /*
         case ActionType.WAIT: {
             return applyWaitPlayerActionToGameState({
                 gameState,
@@ -111,6 +112,7 @@ export const applyPlayerActionToGameState = ({
                 playerId,
             });
         }
+        */
         default:
             throw new Error(`Invalid player action -> ${playerAction.type} ${playerActionId}`);
     }

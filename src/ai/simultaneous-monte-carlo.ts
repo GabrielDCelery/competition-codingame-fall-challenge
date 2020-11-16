@@ -217,10 +217,14 @@ class SimultaneousMCSearch<TState> {
     }): number[] {
         let currentRolloutSteps = 0;
 
-        const currentState = this.cloneGameState({ gameState: rolloutState });
-
         while (true) {
             currentRolloutSteps += 1;
+
+            const reachedMaximumRollout = this.maxRolloutSteps < currentRolloutSteps;
+
+            if (reachedMaximumRollout) {
+                return this.getOutcomeValues({ initialState, currentState: rolloutState });
+            }
 
             const isTerminalState = this.checkIfTerminalState({
                 initialState,
@@ -228,17 +232,15 @@ class SimultaneousMCSearch<TState> {
             });
 
             if (isTerminalState) {
-                return this.getOutcomeValues({ isTerminalState: true, initialState, currentState });
-            }
-
-            const reachedMaximumRollout = this.maxRolloutSteps < currentRolloutSteps;
-
-            if (reachedMaximumRollout) {
-                return this.getOutcomeValues({ initialState, currentState });
+                return this.getOutcomeValues({
+                    isTerminalState: true,
+                    initialState,
+                    currentState: rolloutState,
+                });
             }
 
             const validPlayerActionIdPairs = this.getValidPlayerActionIdPairs({
-                gameState: currentState,
+                gameState: rolloutState,
             });
 
             const randomlyChosenActionIdPair =
@@ -247,7 +249,7 @@ class SimultaneousMCSearch<TState> {
                 ];
 
             this.applyPlayerActionsToGameState({
-                gameState: currentState,
+                gameState: rolloutState,
                 playerActionIds: randomlyChosenActionIdPair,
             });
         }

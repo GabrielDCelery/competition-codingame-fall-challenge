@@ -84,20 +84,6 @@ const isPlayerActionValid = ({
     }
     const { type } = playerAction;
     switch (type) {
-        case ActionType.BREW: {
-            return isBrewPlayerActionValid({
-                gameState,
-                playerAction,
-                playerId,
-            });
-        }
-        case ActionType.REST: {
-            return isRestPlayerActionValid({
-                gameState,
-                playerAction,
-                playerId,
-            });
-        }
         case ActionType.CAST: {
             return isCastPlayerActionValid({
                 gameState,
@@ -112,9 +98,25 @@ const isPlayerActionValid = ({
                 playerId,
             });
         }
+        case ActionType.REST: {
+            return isRestPlayerActionValid({
+                gameState,
+                playerAction,
+                playerId,
+            });
+        }
+        case ActionType.BREW: {
+            return isBrewPlayerActionValid({
+                gameState,
+                playerAction,
+                playerId,
+            });
+        }
+        /*
         case ActionType.WAIT: {
             return true;
         }
+        */
         default:
             throw new Error(`Invalid action type -> ${type}`);
     }
