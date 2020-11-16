@@ -237,13 +237,9 @@ class SimultaneousMCSearchSimulator<TState> {
             groupedWinrates[playerActionId].push(winPercentage);
         });
 
-        //  console.error(groupedWinrates);
-
         const playerActionIds = Object.keys(groupedWinrates);
         let chosenActionId = -1;
         let chosenActionWinPercentage = -1;
-
-        //  console.error(groupedWinrates);
 
         playerActionIds.forEach(key => {
             const winPercentage =

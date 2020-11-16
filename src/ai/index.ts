@@ -1,5 +1,5 @@
 import gameConfig from '../game-config';
-import { GameState } from '../shared';
+import { ActionType, GameState } from '../shared';
 import {
     applyPlayerActionIdsToGameState,
     checkIfTerminalState,
@@ -27,7 +27,11 @@ import MonteCarlo, {
 const mcGetValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<GameState> = ({
     gameState,
 }) => {
-    return getValidPlayerActionIdPairsForTurn({ gameState });
+    const allowedActions =
+        gameState.roundId < 8
+            ? [ActionType.LEARN, ActionType.CAST]
+            : [ActionType.BREW, ActionType.CAST];
+    return getValidPlayerActionIdPairsForTurn({ gameState, allowedActions });
 };
 
 const mcApplyPlayerActionsToGameState: PlayerActionsToGameStateApplier<GameState> = ({

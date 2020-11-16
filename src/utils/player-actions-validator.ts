@@ -134,13 +134,18 @@ const isPlayerActionValid = ({
 const getValidActionsForPlayer = ({
     gameState,
     playerId,
+    allowedActions,
 }: {
     gameState: GameState;
     playerId: string;
+    allowedActions: ActionType[];
 }): number[] => {
     const validActionIds: number[] = [
-        ...gameState.availableBrewActionIds,
-        ...gameState.players[playerId].availableCastActionIds,
+        ...(allowedActions.includes(ActionType.BREW) ? gameState.availableBrewActionIds : []),
+        ...(allowedActions.includes(ActionType.LEARN) ? gameState.avaliableLearnActionIds : []),
+        ...(allowedActions.includes(ActionType.CAST)
+            ? gameState.players[playerId].availableCastActionIds
+            : []),
         ...gameState.availableDefaultActionIds,
     ].filter(playerActionId => {
         return isPlayerActionValid({
@@ -155,21 +160,25 @@ const getValidActionsForPlayer = ({
 
 export const getValidPlayerActionIdPairsForTurn = ({
     gameState,
+    allowedActions,
 }: {
     gameState: GameState;
+    allowedActions: ActionType[];
 }): number[][] => {
     const validPlayerActionPairsForTurn: number[][] = [];
 
-    getValidActionsForPlayer({ playerId: PLAYER_ID_ME, gameState }).forEach(
+    getValidActionsForPlayer({ playerId: PLAYER_ID_ME, gameState, allowedActions }).forEach(
         availableActionIdFirstPlayer => {
-            getValidActionsForPlayer({ playerId: PLAYER_ID_OPPONENT, gameState }).forEach(
-                availableActionIdSecondPlayer => {
-                    validPlayerActionPairsForTurn.push([
-                        availableActionIdFirstPlayer,
-                        availableActionIdSecondPlayer,
-                    ]);
-                }
-            );
+            getValidActionsForPlayer({
+                playerId: PLAYER_ID_OPPONENT,
+                gameState,
+                allowedActions,
+            }).forEach(availableActionIdSecondPlayer => {
+                validPlayerActionPairsForTurn.push([
+                    availableActionIdFirstPlayer,
+                    availableActionIdSecondPlayer,
+                ]);
+            });
         }
     );
 

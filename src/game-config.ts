@@ -14,9 +14,10 @@ interface LeagueConfig {
         maxTimetoSpendInMs: number;
         cConst: number;
         maxRolloutSteps: number;
-        spellCastNegativeWeights: number[];
-        spellCastPositiveWeights: number[];
-        unusedIngredientScoreWeights: number[];
+        scoringStrategy: {
+            spellCastNegativeWeights: number[];
+            unusedIngredientScoreWeights: number[];
+        };
     };
     defaultActionConfigs: PlayerActionConfig[];
 }
@@ -29,10 +30,11 @@ const configs: { [index: string]: LeagueConfig } = {
             numOfMaxIterations: 10000,
             maxTimetoSpendInMs: 20,
             cConst: 2,
-            maxRolloutSteps: 5,
-            spellCastNegativeWeights: [0.1, 0.3, 0.5, 0.7],
-            spellCastPositiveWeights: [0.1, 0.3, 0.5, 0.7],
-            unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+            maxRolloutSteps: 4,
+            scoringStrategy: {
+                spellCastNegativeWeights: [0.1, 0.2, 0.3, 0.4],
+                unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+            },
         },
         defaultActionConfigs: [
             /*
@@ -64,10 +66,13 @@ const configs: { [index: string]: LeagueConfig } = {
         maxInventorySize: 10,
         monteCarlo: {
             numOfMaxIterations: 10000,
-            maxTimetoSpendInMs: 45,
+            maxTimetoSpendInMs: 42,
             cConst: 2,
             maxRolloutSteps: 4,
-            unusedIngredientScoreWeights: [0.2, 0.4, 0.4, 0.4],
+            scoringStrategy: {
+                spellCastNegativeWeights: [0.1, 0.2, 0.3, 0.4],
+                unusedIngredientScoreWeights: [0.2, 0.4, 0.4, 0.4],
+            },
         },
         defaultActionConfigs: [
             {

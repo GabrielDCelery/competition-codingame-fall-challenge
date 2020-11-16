@@ -99,8 +99,6 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
 
     const actionCount = parseInt(readNextLine());
 
-    // console.error(`acountCount - ${actionCount}`);
-
     for (let i = 0; i < actionCount; i++) {
         const inputs = readNextLine().split(' ');
         const id = parseInt(inputs[0]);

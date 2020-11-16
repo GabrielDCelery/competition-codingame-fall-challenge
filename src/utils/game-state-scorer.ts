@@ -1,13 +1,29 @@
 import gameConfig, { PLAYER_ID_ME, PLAYER_ID_OPPONENT, INGREDIENT_VALUES } from '../game-config';
-import { GameState } from '../shared';
+import { GameState, PlayerActionConfig } from '../shared';
 import apac from './available-player-action-configs';
 
-const spellValue = (deltas: number[]): number => {
-    let cost;
-    let generated = deltas.forEach((delta, index) => {
-        diffGenerated += delta * INGREDIENT_VALUES[index];
+const getSpellValue = (learnAction: PlayerActionConfig): number => {
+    let totalValueGenerated = 0;
+
+    learnAction.deltas.forEach((delta, index) => {
+        if (delta === 0) {
+            return;
+        }
+
+        let valueGenerated = delta * INGREDIENT_VALUES[index];
+
+        if (valueGenerated < 0) {
+            valueGenerated =
+                valueGenerated *
+                gameConfig.monteCarlo.scoringStrategy.spellCastNegativeWeights[index];
+        }
+
+        totalValueGenerated += valueGenerated;
     });
-    return 1;
+
+    totalValueGenerated =
+        totalValueGenerated - learnAction.tomeIndex * 0.2 + learnAction.taxCount * 0.55;
+    return totalValueGenerated < 0 ? 0 : totalValueGenerated;
 };
 
 const scoreLearnedSpells = ({
@@ -20,15 +36,24 @@ const scoreLearnedSpells = ({
     playerId: string;
 }): number => {
     if (
-        currentState.players[playerId].learnedCastActionIds ===
-        initialState.players[playerId].learnedCastActionIds
+        currentState.players[playerId].learnedCastActionIds.length ===
+        initialState.players[playerId].learnedCastActionIds.length
     ) {
         return 0;
     }
 
-    return totalScore;
+    const newLearnedSpellIds = currentState.players[playerId].learnedCastActionIds.filter(e => {
+        return !initialState.players[playerId].learnedCastActionIds.includes(e);
+    });
+
+    const spellScores = newLearnedSpellIds.map(newLearnedSpellId => {
+        return getSpellValue(apac.state[newLearnedSpellId]);
+    });
+
+    return spellScores.reduce((a, b) => a + b, 0);
 };
 
+/*
 const getPotionIngredientDistribution = ({
     gameState,
 }: {
@@ -46,6 +71,7 @@ const getPotionIngredientDistribution = ({
 
     return { ingredients, total };
 };
+*/
 
 const scoreUnusedIngredients = ({
     gameState,
@@ -55,7 +81,7 @@ const scoreUnusedIngredients = ({
     playerId: string;
 }): number => {
     const ingredients = gameState.players[playerId].ingredients;
-    const weights = gameConfig.monteCarlo.unusedIngredientScoreWeights;
+    const weights = gameConfig.monteCarlo.scoringStrategy.unusedIngredientScoreWeights;
 
     const totalScore =
         ingredients[0] * INGREDIENT_VALUES[0] * weights[0] +
@@ -68,7 +94,7 @@ const scoreUnusedIngredients = ({
 
 export const scoreGameState = ({
     isTerminalState,
-    // initialState,
+    initialState,
     currentState,
 }: {
     isTerminalState?: boolean;
@@ -94,7 +120,14 @@ export const scoreGameState = ({
         return scoreUnusedIngredients({ gameState: currentState, playerId });
     });
 
-    const playerScores = [brewScores[0] + ingredientScores[0], brewScores[1] + ingredientScores[1]];
+    const spellScores = playerIds.map(playerId => {
+        return scoreLearnedSpells({ initialState, currentState, playerId });
+    });
+
+    const playerScores = [
+        brewScores[0] + ingredientScores[0] + spellScores[0],
+        brewScores[1] + ingredientScores[1] + spellScores[1],
+    ];
     const totalScore = playerScores[0] + playerScores[1];
     return [playerScores[0] / totalScore, playerScores[1] / totalScore];
 };
