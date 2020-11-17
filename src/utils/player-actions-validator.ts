@@ -136,7 +136,7 @@ const isPlayerActionValid = ({
             throw new Error(`Invalid action type -> ${playerAction.type}`);
     }
 };
-
+/*
 const getValidActionsForPlayer = ({
     gameState,
     playerId,
@@ -163,7 +163,7 @@ const getValidActionsForPlayer = ({
 
     return validActionIds.length === 0 ? gameState.availableDefaultActionIds : validActionIds;
 };
-/*
+
 const getActionPoolForPlayer = ({
     gameState,
     playerId,
@@ -210,13 +210,50 @@ const pushActionPairIfValid = ({
 */
 export const getValidPlayerActionIdPairsForTurn = ({
     gameState,
-    allowedActions,
+    actionPoolPair,
 }: {
     gameState: GameState;
-    allowedActions: ActionType[];
+    actionPoolPair: number[][];
+    //allowedActions: ActionType[];
 }): number[][] => {
     const validPlayerActionPairsForTurn: number[][] = [];
 
+    let validActionsFirstPlayer = actionPoolPair[0].filter(playerActionId => {
+        return isPlayerActionValid({
+            gameState,
+            playerActionId,
+            playerId: PLAYER_ID_ME,
+        });
+    });
+
+    validActionsFirstPlayer =
+        validActionsFirstPlayer.length === 0
+            ? gameState.availableDefaultActionIds
+            : validActionsFirstPlayer;
+
+    let validActionsSecondPlayer = actionPoolPair[1].filter(playerActionId => {
+        return isPlayerActionValid({
+            gameState,
+            playerActionId,
+            playerId: PLAYER_ID_OPPONENT,
+        });
+    });
+
+    validActionsSecondPlayer =
+        validActionsSecondPlayer.length === 0
+            ? gameState.availableDefaultActionIds
+            : validActionsSecondPlayer;
+
+    validActionsFirstPlayer.forEach(availableActionIdFirstPlayer => {
+        validActionsSecondPlayer.forEach(availableActionIdSecondPlayer => {
+            validPlayerActionPairsForTurn.push([
+                availableActionIdFirstPlayer,
+                availableActionIdSecondPlayer,
+            ]);
+        });
+    });
+
+    /*
     getValidActionsForPlayer({ playerId: PLAYER_ID_ME, gameState, allowedActions }).forEach(
         availableActionIdFirstPlayer => {
             getValidActionsForPlayer({
@@ -231,6 +268,7 @@ export const getValidPlayerActionIdPairsForTurn = ({
             });
         }
     );
+    */
 
     return validPlayerActionPairsForTurn;
 };

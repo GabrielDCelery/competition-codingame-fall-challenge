@@ -29,7 +29,25 @@ class Agent {
                 ? [ActionType.LEARN, ActionType.CAST, ActionType.REST]
                 : [ActionType.BREW, ActionType.CAST, ActionType.REST];
 
-        return getValidPlayerActionIdPairsForTurn({ gameState, allowedActions });
+        const a = [
+            ...(allowedActions.includes(ActionType.BREW) ? gameState.availableBrewActionIds : []),
+            ...(allowedActions.includes(ActionType.LEARN) ? gameState.avaliableLearnActionIds : []),
+            ...(allowedActions.includes(ActionType.CAST)
+                ? gameState.players[PLAYER_ID_ME].availableCastActionIds
+                : []),
+            ...gameState.availableDefaultActionIds,
+        ];
+
+        const b = [
+            ...(allowedActions.includes(ActionType.BREW) ? gameState.availableBrewActionIds : []),
+            ...(allowedActions.includes(ActionType.LEARN) ? gameState.avaliableLearnActionIds : []),
+            ...(allowedActions.includes(ActionType.CAST)
+                ? gameState.players[PLAYER_ID_OPPONENT].availableCastActionIds
+                : []),
+            ...gameState.availableDefaultActionIds,
+        ];
+
+        return getValidPlayerActionIdPairsForTurn({ gameState, actionPoolPair: [a, b] });
     };
 
     applyPlayerActionsToGameState: PlayerActionsToGameStateApplier<GameState> = ({
