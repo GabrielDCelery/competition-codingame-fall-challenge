@@ -11,6 +11,9 @@ const isBrewPlayerActionValid = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): boolean => {
+    if (gameState.availableBrewActionIdsMap[playerAction.id] !== true) {
+        return false;
+    }
     for (let i = 0, iMax = playerAction.deltas.length; i < iMax; i++) {
         if (gameState.players[playerId].ingredients[i] + playerAction.deltas[i] < 0) {
             return false;
@@ -42,6 +45,10 @@ const isCastPlayerActionValid = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): boolean => {
+    if (gameState.players[playerId].availableCastActionIdsMap[playerAction.id] !== true) {
+        return false;
+    }
+
     let inventorySizeAfterCast = 0;
 
     for (let i = 0, iMax = playerAction.deltas.length; i < iMax; i++) {
@@ -68,6 +75,9 @@ const isLearnPlayerActionValid = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): boolean => {
+    if (gameState.avaliableLearnActionIdsMap[playerAction.id] !== true) {
+        return false;
+    }
     return playerAction.tomeIndex <= gameState.players[playerId].ingredients[0];
 };
 
@@ -81,11 +91,7 @@ const isPlayerActionValid = ({
     playerId: string;
 }): boolean => {
     const playerAction = apac.state[playerActionId];
-    if (!playerAction) {
-        throw new Error(`isPlayerActionValid - Not valid action id -> ${playerActionId}`);
-    }
-    const { type } = playerAction;
-    switch (type) {
+    switch (playerAction.type) {
         case ActionType.CAST: {
             return isCastPlayerActionValid({
                 gameState,
@@ -127,7 +133,7 @@ const isPlayerActionValid = ({
         }
         */
         default:
-            throw new Error(`Invalid action type -> ${type}`);
+            throw new Error(`Invalid action type -> ${playerAction.type}`);
     }
 };
 

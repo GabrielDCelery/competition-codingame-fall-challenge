@@ -43,7 +43,7 @@ const configs: { [index: string]: LeagueConfig } = {
             numOfMaxIterations: 10000,
             maxTimetoSpendInMs: 20,
             cConst: 2,
-            maxRolloutSteps: 4,
+            maxRolloutSteps: 3,
             scoringStrategy: {
                 spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
                 unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],

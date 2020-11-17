@@ -1,9 +1,9 @@
+import gameConfig, { NUM_OF_GAME_ROUNDS, PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../game-config';
 import { ActionType, GameState } from '../shared';
 import {
     getValidPlayerActionIdPairsForTurn,
     applyPlayerActionIdsToGameState,
     scoreGameState,
-    checkIfTerminalState,
     cloneGameState,
 } from '../utils';
 import {
@@ -47,11 +47,21 @@ class Agent {
         });
     };
 
-    checkIfTerminalState: TerminalStateChecker<GameState> = ({ initialState, currentState }) => {
-        return checkIfTerminalState({
-            initialState,
-            currentState,
-        });
+    checkIfTerminalState: TerminalStateChecker<GameState> = ({ currentState }) => {
+        if (currentState.roundId === NUM_OF_GAME_ROUNDS) {
+            return true;
+        }
+
+        if (
+            currentState.players[PLAYER_ID_ME].numOfPotionsBrewed >=
+                gameConfig.numOfPotionsToBrewToWin ||
+            currentState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed >=
+                gameConfig.numOfPotionsToBrewToWin
+        ) {
+            return true;
+        }
+
+        return false;
     };
 
     cloneGameState: GameStateCloner<GameState> = ({ gameState }) => {

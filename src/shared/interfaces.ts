@@ -6,6 +6,7 @@ export interface PlayerState {
     score: number;
     learnedCastActionIds: number[];
     availableCastActionIds: number[];
+    availableCastActionIdsMap: { [index: string]: boolean };
 }
 
 export interface PlayerActionConfig {
@@ -32,4 +33,5 @@ export interface GameState {
     availableBrewActionIdsMap: { [index: string]: boolean };
     availableDefaultActionIds: number[];
     avaliableLearnActionIds: number[];
+    avaliableLearnActionIdsMap: { [index: string]: boolean };
 }

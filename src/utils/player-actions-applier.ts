@@ -16,9 +16,7 @@ const applyBrewPlayerActionToGameState = ({
     });
     gameState.players[playerId].numOfPotionsBrewed += 1;
     gameState.players[playerId].score += playerAction.price;
-    gameState.availableBrewActionIds = gameState.availableBrewActionIds.filter(item => {
-        return item !== playerAction.id;
-    });
+    gameState.availableBrewActionIdsMap[playerAction.id] = false;
 };
 
 const applyRestPlayerActionToGameState = ({
@@ -49,9 +47,7 @@ const applyLearnPlayerActionToGameState = ({
         ...gameState.players[playerId].learnedCastActionIds,
         playerAction.id,
     ];
-    gameState.avaliableLearnActionIds = gameState.avaliableLearnActionIds.filter(item => {
-        return item !== playerAction.id;
-    });
+    gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
 };
 
 const applyCastPlayerActionToGameState = ({
@@ -66,11 +62,7 @@ const applyCastPlayerActionToGameState = ({
     playerAction.deltas.forEach((delta, index) => {
         gameState.players[playerId].ingredients[index] += delta;
     });
-    gameState.players[playerId].availableCastActionIds = gameState.players[
-        playerId
-    ].availableCastActionIds.filter(item => {
-        return item !== playerAction.id;
-    });
+    gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
 };
 /*
 const applyWaitPlayerActionToGameState = ({}: {
