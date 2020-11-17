@@ -42,13 +42,11 @@ const scoreLearnedSpells = ({
         return 0;
     }
 
-    const newLearnedSpellIds = currentState.players[playerId].learnedCastActionIds.filter(e => {
-        return !initialState.players[playerId].learnedCastActionIds.includes(e);
-    });
-
-    const spellScores = newLearnedSpellIds.map(newLearnedSpellId => {
-        return getSpellValue(apac.state[newLearnedSpellId]);
-    });
+    const spellScores = currentState.players[playerId].newlyLearnedSpellIds.map(
+        newLearnedSpellId => {
+            return getSpellValue(apac.state[newLearnedSpellId]);
+        }
+    );
 
     return spellScores.reduce((a, b) => a + b, 0);
 };

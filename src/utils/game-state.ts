@@ -21,6 +21,7 @@ export const createInitialGameState = (): GameState => {
                 learnedCastActionIds: [],
                 availableCastActionIds: [],
                 availableCastActionIdsMap: {},
+                newlyLearnedSpellIds: [],
             },
             [PLAYER_ID_OPPONENT]: {
                 numOfPotionsBrewed: 0,
@@ -29,6 +30,7 @@ export const createInitialGameState = (): GameState => {
                 learnedCastActionIds: [],
                 availableCastActionIds: [],
                 availableCastActionIdsMap: {},
+                newlyLearnedSpellIds: [],
             },
         },
         availableBrewActionIds: [],
@@ -79,6 +81,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
                 learnedCastActionIds: [],
                 availableCastActionIds: [],
                 availableCastActionIdsMap: {},
+                newlyLearnedSpellIds: [],
             },
             [PLAYER_ID_OPPONENT]: {
                 numOfPotionsBrewed: oldGameState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed,
@@ -89,6 +92,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
                 ],
                 availableCastActionIds: [],
                 availableCastActionIdsMap: {},
+                newlyLearnedSpellIds: [],
             },
         },
         availableBrewActionIds: [],
@@ -203,6 +207,7 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
             learnedCastActionIds: [...player.learnedCastActionIds],
             availableCastActionIds: [...player.availableCastActionIds],
             availableCastActionIdsMap: { ...player.availableCastActionIdsMap },
+            newlyLearnedSpellIds: [...player.newlyLearnedSpellIds],
         };
     });
 

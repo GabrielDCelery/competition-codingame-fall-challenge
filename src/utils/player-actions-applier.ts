@@ -11,8 +11,8 @@ const applyBrewPlayerActionToGameState = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): void => {
-    playerAction.deltas.forEach((delta, index) => {
-        gameState.players[playerId].ingredients[index] += delta;
+    gameState.players[playerId].ingredients = playerAction.deltas.map((delta, index) => {
+        return gameState.players[playerId].ingredients[index] + delta;
     });
     gameState.players[playerId].numOfPotionsBrewed += 1;
     gameState.players[playerId].score += playerAction.price;
@@ -48,6 +48,7 @@ const applyLearnPlayerActionToGameState = ({
         playerAction.id,
     ];
     gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
+    gameState.players[playerId].newlyLearnedSpellIds.push(playerAction.id);
 };
 
 const applyCastPlayerActionToGameState = ({
@@ -59,8 +60,8 @@ const applyCastPlayerActionToGameState = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): void => {
-    playerAction.deltas.forEach((delta, index) => {
-        gameState.players[playerId].ingredients[index] += delta;
+    gameState.players[playerId].ingredients = playerAction.deltas.map((delta, index) => {
+        return gameState.players[playerId].ingredients[index] + delta;
     });
     gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
 };
@@ -83,9 +84,6 @@ export const applyPlayerActionToGameState = ({
     playerId: string;
 }): void => {
     const playerAction = apac.state[playerActionId];
-    if (!playerAction) {
-        throw new Error(`applyPlayerActionToGameState - Not valid action id -> ${playerActionId}`);
-    }
     switch (playerAction.type) {
         case ActionType.CAST: {
             return applyCastPlayerActionToGameState({
