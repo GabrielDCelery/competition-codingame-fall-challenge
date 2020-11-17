@@ -30,6 +30,7 @@ export const createInitialGameState = (): GameState => {
             },
         },
         availableBrewActionIds: [],
+        availableBrewActionIdsMap: {},
         availableDefaultActionIds: [],
         avaliableLearnActionIds: [],
     };
@@ -86,6 +87,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
             },
         },
         availableBrewActionIds: [],
+        availableBrewActionIdsMap: {},
         availableDefaultActionIds: [],
         avaliableLearnActionIds: [],
     };
@@ -122,6 +124,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
 
         if (availableActionConfig.type == ActionType.BREW) {
             newGameState.availableBrewActionIds.push(availableActionConfig.id);
+            newGameState.availableBrewActionIdsMap[availableActionConfig.id] = true;
             continue;
         }
         if (availableActionConfig.type == ActionType.CAST) {
@@ -174,6 +177,7 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
         roundId: gameState.roundId,
         players: {},
         availableBrewActionIds: [],
+        availableBrewActionIdsMap: {},
         availableDefaultActionIds: [],
         avaliableLearnActionIds: [],
     };
@@ -190,6 +194,9 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
     });
 
     clonedState.availableBrewActionIds = [...gameState.availableBrewActionIds];
+    clonedState.availableBrewActionIdsMap = {
+        ...gameState.availableBrewActionIdsMap,
+    };
     clonedState.availableDefaultActionIds = [...gameState.availableDefaultActionIds];
     clonedState.avaliableLearnActionIds = [...gameState.avaliableLearnActionIds];
 

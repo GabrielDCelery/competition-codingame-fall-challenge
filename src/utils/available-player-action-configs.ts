@@ -11,10 +11,6 @@ class AvailablePlayerActionConfigsClass {
         this.state = {};
     }
 
-    get(playerActionId: number): PlayerActionConfig {
-        return this.state[playerActionId];
-    }
-
     addConfig(availableActionConfig: PlayerActionConfig): void {
         this.state[availableActionConfig.id] = availableActionConfig;
     }

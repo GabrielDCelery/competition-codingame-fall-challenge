@@ -29,6 +29,7 @@ export interface GameState {
         [index: string]: PlayerState;
     };
     availableBrewActionIds: number[];
+    availableBrewActionIdsMap: { [index: string]: boolean };
     availableDefaultActionIds: number[];
     avaliableLearnActionIds: number[];
 }
