@@ -32,7 +32,7 @@ const configs: { [index: string]: LeagueConfig } = {
             cConst: 2,
             maxRolloutSteps: 4,
             scoringStrategy: {
-                spellCastNegativeWeights: [0.1, 0.2, 0.3, 0.4],
+                spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
                 unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
             },
         },
