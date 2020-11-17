@@ -20,7 +20,7 @@ export type TerminalStateChecker<TState> = ({
     currentState: TState;
 }) => boolean;
 
-export type OutcomeValuesGetter<TState> = ({
+export type StateScorer<TState> = ({
     isTerminalState,
     initialState,
     currentState,
@@ -144,7 +144,7 @@ class SimultaneousMCSearch<TState> {
     cConst: number;
     getValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<TState>;
     applyPlayerActionsToGameState: PlayerActionsToGameStateApplier<TState>;
-    getOutcomeValues: OutcomeValuesGetter<TState>;
+    scoreState: StateScorer<TState>;
     checkIfTerminalState: TerminalStateChecker<TState>;
     cloneGameState: GameStateCloner<TState>;
 
@@ -155,7 +155,7 @@ class SimultaneousMCSearch<TState> {
         maxRolloutSteps,
         getValidPlayerActionIdPairs,
         applyPlayerActionsToGameState,
-        getOutcomeValues,
+        scoreState,
         checkIfTerminalState,
         cloneGameState,
     }: {
@@ -165,7 +165,7 @@ class SimultaneousMCSearch<TState> {
         maxRolloutSteps: number;
         getValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<TState>;
         applyPlayerActionsToGameState: PlayerActionsToGameStateApplier<TState>;
-        getOutcomeValues: OutcomeValuesGetter<TState>;
+        scoreState: StateScorer<TState>;
         checkIfTerminalState: TerminalStateChecker<TState>;
         cloneGameState: GameStateCloner<TState>;
     }) {
@@ -175,7 +175,7 @@ class SimultaneousMCSearch<TState> {
         this.cConst = cConst;
         this.getValidPlayerActionIdPairs = getValidPlayerActionIdPairs;
         this.applyPlayerActionsToGameState = applyPlayerActionsToGameState;
-        this.getOutcomeValues = getOutcomeValues;
+        this.scoreState = scoreState;
         this.checkIfTerminalState = checkIfTerminalState;
         this.cloneGameState = cloneGameState;
 
@@ -223,7 +223,7 @@ class SimultaneousMCSearch<TState> {
             const reachedMaximumRollout = this.maxRolloutSteps < currentRolloutSteps;
 
             if (reachedMaximumRollout) {
-                return this.getOutcomeValues({ initialState, currentState: rolloutState });
+                return this.scoreState({ initialState, currentState: rolloutState });
             }
 
             const isTerminalState = this.checkIfTerminalState({
@@ -232,7 +232,7 @@ class SimultaneousMCSearch<TState> {
             });
 
             if (isTerminalState) {
-                return this.getOutcomeValues({
+                return this.scoreState({
                     isTerminalState: true,
                     initialState,
                     currentState: rolloutState,

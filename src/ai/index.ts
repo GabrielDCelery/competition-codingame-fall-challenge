@@ -19,7 +19,7 @@ export const choosePlayerActionId = ({
         cConst: gameConfig.monteCarlo.cConst,
         getValidPlayerActionIdPairs: agent.getValidPlayerActionIdPairs,
         applyPlayerActionsToGameState: agent.applyPlayerActionsToGameState,
-        getOutcomeValues: agent.getOutcomeValues,
+        scoreState: agent.scoreState,
         checkIfTerminalState: agent.checkIfTerminalState,
         cloneGameState: agent.cloneGameState,
     });

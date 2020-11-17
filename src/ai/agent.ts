@@ -9,7 +9,7 @@ import {
 import {
     ValidPlayerActionIdPairsGetter,
     PlayerActionsToGameStateApplier,
-    OutcomeValuesGetter,
+    StateScorer,
     TerminalStateChecker,
     GameStateCloner,
 } from './simultaneous-monte-carlo-efficient';
@@ -18,7 +18,7 @@ class Agent {
     constructor() {
         this.getValidPlayerActionIdPairs = this.getValidPlayerActionIdPairs.bind(this);
         this.applyPlayerActionsToGameState = this.applyPlayerActionsToGameState.bind(this);
-        this.getOutcomeValues = this.getOutcomeValues.bind(this);
+        this.scoreState = this.scoreState.bind(this);
         this.checkIfTerminalState = this.checkIfTerminalState.bind(this);
         this.cloneGameState = this.cloneGameState.bind(this);
     }
@@ -39,11 +39,7 @@ class Agent {
         applyPlayerActionIdsToGameState({ gameState, playerActionIds });
     };
 
-    getOutcomeValues: OutcomeValuesGetter<GameState> = ({
-        isTerminalState,
-        initialState,
-        currentState,
-    }) => {
+    scoreState: StateScorer<GameState> = ({ isTerminalState, initialState, currentState }) => {
         return scoreGameState({
             isTerminalState,
             initialState,
