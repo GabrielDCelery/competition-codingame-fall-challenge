@@ -2,7 +2,13 @@ import gameConfig, { PLAYER_ID_ME, PLAYER_ID_OPPONENT, INGREDIENT_VALUES } from 
 import { GameState, PlayerActionConfig } from '../shared';
 import apac from './available-player-action-configs';
 
-const getSpellValue = (learnAction: PlayerActionConfig): number => {
+const getSpellValue = ({
+    learnAction,
+    playerId,
+}: {
+    learnAction: PlayerActionConfig;
+    playerId: string;
+}): number => {
     let totalValueGenerated = 0;
 
     learnAction.deltas.forEach((delta, index) => {
@@ -15,7 +21,7 @@ const getSpellValue = (learnAction: PlayerActionConfig): number => {
         if (valueGenerated < 0) {
             valueGenerated =
                 valueGenerated *
-                gameConfig.monteCarlo.scoringStrategy.spellCastNegativeWeights[index];
+                gameConfig.agentStrategy[playerId].scoring.spellCastNegativeWeights[index];
         }
 
         totalValueGenerated += valueGenerated;
@@ -44,7 +50,7 @@ const scoreLearnedSpells = ({
 
     const spellScores = currentState.players[playerId].newlyLearnedSpellIds.map(
         newLearnedSpellId => {
-            return getSpellValue(apac.state[newLearnedSpellId]);
+            return getSpellValue({ learnAction: apac.state[newLearnedSpellId], playerId });
         }
     );
 
@@ -79,7 +85,7 @@ const scoreUnusedIngredients = ({
     playerId: string;
 }): number => {
     const ingredients = gameState.players[playerId].ingredients;
-    const weights = gameConfig.monteCarlo.scoringStrategy.unusedIngredientScoreWeights;
+    const weights = gameConfig.agentStrategy[playerId].scoring.unusedIngredientScoreWeights;
 
     const totalScore =
         ingredients[0] * INGREDIENT_VALUES[0] * weights[0] +

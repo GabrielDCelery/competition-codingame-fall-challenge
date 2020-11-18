@@ -14,19 +14,16 @@ interface AgentScoringStrategy {
 interface LeagueConfig {
     numOfPotionsToBrewToWin: number;
     maxInventorySize: number;
-    agentScoringStrategy: {
-        spellCastNegativeWeights: number[];
-        unusedIngredientScoreWeights: number[];
+    agentStrategy: {
+        [index: string]: {
+            scoring: AgentScoringStrategy;
+        };
     };
     monteCarlo: {
         numOfMaxIterations: number;
         maxTimetoSpendInMs: number;
         cConst: number;
         maxRolloutSteps: number;
-        scoringStrategy: {
-            spellCastNegativeWeights: number[];
-            unusedIngredientScoreWeights: number[];
-        };
     };
     defaultActionConfigs: PlayerActionConfig[];
 }
@@ -35,19 +32,25 @@ const configs: { [index: string]: LeagueConfig } = {
     [League.Wood1]: {
         numOfPotionsToBrewToWin: 3,
         maxInventorySize: 10,
-        agentScoringStrategy: {
-            spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
-            unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+        agentStrategy: {
+            [PLAYER_ID_ME]: {
+                scoring: {
+                    spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
+                    unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+                },
+            },
+            [PLAYER_ID_OPPONENT]: {
+                scoring: {
+                    spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
+                    unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+                },
+            },
         },
         monteCarlo: {
             numOfMaxIterations: 10000,
             maxTimetoSpendInMs: 20,
             cConst: 2,
             maxRolloutSteps: 3,
-            scoringStrategy: {
-                spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
-                unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
-            },
         },
         defaultActionConfigs: [
             /*
@@ -77,19 +80,25 @@ const configs: { [index: string]: LeagueConfig } = {
     [League.Bronze]: {
         numOfPotionsToBrewToWin: 6,
         maxInventorySize: 10,
-        agentScoringStrategy: {
-            spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
-            unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+        agentStrategy: {
+            [PLAYER_ID_ME]: {
+                scoring: {
+                    spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
+                    unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+                },
+            },
+            [PLAYER_ID_OPPONENT]: {
+                scoring: {
+                    spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
+                    unusedIngredientScoreWeights: [0.55, 0.6, 0.65, 0.7],
+                },
+            },
         },
         monteCarlo: {
             numOfMaxIterations: 10000,
             maxTimetoSpendInMs: 42,
             cConst: 2,
             maxRolloutSteps: 4,
-            scoringStrategy: {
-                spellCastNegativeWeights: [1.1, 1.2, 1.3, 1.4],
-                unusedIngredientScoreWeights: [0.2, 0.3, 0.3, 0.3],
-            },
         },
         defaultActionConfigs: [
             {
