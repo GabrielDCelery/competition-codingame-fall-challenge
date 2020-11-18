@@ -87,9 +87,7 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
                 numOfPotionsBrewed: oldGameState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed,
                 ingredients: [],
                 score: 0,
-                learnedCastActionIds: [
-                    ...oldGameState.players[PLAYER_ID_OPPONENT].learnedCastActionIds,
-                ],
+                learnedCastActionIds: [],
                 availableCastActionIds: [],
                 availableCastActionIdsMap: {},
                 newlyLearnedSpellIds: [],

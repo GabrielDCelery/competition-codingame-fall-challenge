@@ -12,16 +12,30 @@ import {
     StateScorer,
     TerminalStateChecker,
     GameStateCloner,
+    GameStateGetter,
 } from './simultaneous-monte-carlo-efficient';
 
 class Agent {
+    private gameState: GameState;
+
     constructor() {
         this.getValidPlayerActionIdPairs = this.getValidPlayerActionIdPairs.bind(this);
         this.applyPlayerActionsToGameState = this.applyPlayerActionsToGameState.bind(this);
         this.scoreState = this.scoreState.bind(this);
         this.checkIfTerminalState = this.checkIfTerminalState.bind(this);
         this.cloneGameState = this.cloneGameState.bind(this);
+        this.getGameState = this.getGameState.bind(this);
     }
+
+    setGameState({ gameState }: { gameState: GameState }): this {
+        this.gameState = this.cloneGameState({ gameState });
+        return this;
+    }
+
+    getGameState: GameStateGetter<GameState> = () => {
+        console.error(JSON.stringify(this.gameState));
+        return this.gameState;
+    };
 
     getValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<GameState> = ({ gameState }) => {
         const allowedActions =

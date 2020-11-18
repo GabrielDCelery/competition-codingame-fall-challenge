@@ -32,6 +32,8 @@ export type StateScorer<TState> = ({
 
 export type GameStateCloner<TState> = ({ gameState }: { gameState: TState }) => TState;
 
+export type GameStateGetter<TState> = () => TState;
+
 interface MCNode {
     visitCount: number;
     playerActionIds: number[] | null;
@@ -52,6 +54,7 @@ class SimultaneousMCSearchSimulator<TState> {
     scoreState: StateScorer<TState>;
     checkIfTerminalState: TerminalStateChecker<TState>;
     cloneGameState: GameStateCloner<TState>;
+    getGameState: GameStateGetter<TState>;
 
     constructor({
         numOfMaxIterations,
@@ -63,6 +66,7 @@ class SimultaneousMCSearchSimulator<TState> {
         scoreState,
         checkIfTerminalState,
         cloneGameState,
+        getGameState,
     }: {
         numOfMaxIterations: number;
         maxTimetoSpend: number;
@@ -73,6 +77,7 @@ class SimultaneousMCSearchSimulator<TState> {
         scoreState: StateScorer<TState>;
         checkIfTerminalState: TerminalStateChecker<TState>;
         cloneGameState: GameStateCloner<TState>;
+        getGameState: GameStateGetter<TState>;
     }) {
         this.numOfMaxIterations = numOfMaxIterations;
         this.maxTimetoSpend = maxTimetoSpend;
@@ -83,6 +88,7 @@ class SimultaneousMCSearchSimulator<TState> {
         this.scoreState = scoreState;
         this.checkIfTerminalState = checkIfTerminalState;
         this.cloneGameState = cloneGameState;
+        this.getGameState = getGameState;
         this.rootNode = {
             visitCount: 0,
             playerActionIds: null,
@@ -266,10 +272,12 @@ class SimultaneousMCSearchSimulator<TState> {
         });
     }
 
-    run({ gameState }: { gameState: TState }): number {
+    run(): number {
         let numOfCurrentIterations = 0;
         const start = new Date().getTime();
         let playerRunningTheSimulation = 0;
+
+        const gameState = this.getGameState();
 
         while (true) {
             if (this.maxTimetoSpend < new Date().getTime() - start) {

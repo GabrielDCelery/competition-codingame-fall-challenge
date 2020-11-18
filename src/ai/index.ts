@@ -12,6 +12,8 @@ export const choosePlayerActionId = ({
     gameState: GameState;
     playerId: string;
 }): number => {
+    agent.setGameState({ gameState });
+
     const mc = new MonteCarlo<GameState>({
         numOfMaxIterations: gameConfig.monteCarlo.numOfMaxIterations,
         maxTimetoSpend: gameConfig.monteCarlo.maxTimetoSpendInMs,
@@ -22,7 +24,9 @@ export const choosePlayerActionId = ({
         scoreState: agent.scoreState,
         checkIfTerminalState: agent.checkIfTerminalState,
         cloneGameState: agent.cloneGameState,
+        getGameState: agent.getGameState,
     });
-    const chosenActionId = mc.run({ gameState });
+
+    const chosenActionId = mc.run();
     return chosenActionId;
 };
