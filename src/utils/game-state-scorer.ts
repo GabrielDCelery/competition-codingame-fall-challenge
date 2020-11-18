@@ -1,42 +1,8 @@
 import gameConfig, { PLAYER_ID_ME, PLAYER_ID_OPPONENT, INGREDIENT_VALUES } from '../game-config';
-import { GameState, PlayerActionConfig } from '../shared';
+import { GameState } from '../shared';
 import apac from './available-player-action-configs';
 
-const getSpellValue = ({
-    learnAction,
-    playerId,
-}: {
-    learnAction: PlayerActionConfig;
-    playerId: string;
-}): number => {
-    let totalValueGenerated = 0;
-
-    learnAction.deltas.forEach((delta, index) => {
-        if (delta === 0) {
-            return;
-        }
-
-        let valueGenerated = delta * INGREDIENT_VALUES[index];
-
-        if (valueGenerated < 0) {
-            valueGenerated =
-                valueGenerated *
-                gameConfig.agentStrategy[playerId].scoring.spellCastNegativeWeights[index];
-        }
-
-        totalValueGenerated += valueGenerated;
-    });
-
-    totalValueGenerated =
-        totalValueGenerated -
-        learnAction.tomeIndex * 0.2 +
-        learnAction.taxCount *
-            gameConfig.agentStrategy[playerId].scoring.unusedIngredientScoreWeights[0];
-    return totalValueGenerated < 0 ? 0 : totalValueGenerated;
-};
-
-const scoreLearnedSpells = ({
-    initialState,
+const getAverageProductionPerTurn = ({
     currentState,
     playerId,
 }: {
@@ -44,43 +10,20 @@ const scoreLearnedSpells = ({
     currentState: GameState;
     playerId: string;
 }): number => {
-    if (
-        currentState.players[playerId].learnedCastActionIds.length ===
-        initialState.players[playerId].learnedCastActionIds.length
-    ) {
-        return 0;
-    }
+    let totalProduction = 0;
+    const learnedCastActionIds = currentState.players[playerId].learnedCastActionIds;
+    const weights = gameConfig.agentStrategy[playerId].scoring.unusedIngredientScoreWeights;
 
-    const spellScores = currentState.players[playerId].newlyLearnedSpellIds.map(
-        newLearnedSpellId => {
-            return getSpellValue({ learnAction: apac.state[newLearnedSpellId], playerId });
-        }
-    );
-
-    return spellScores.reduce((a, b) => a + b, 0);
-};
-
-/*
-const getPotionIngredientDistribution = ({
-    gameState,
-}: {
-    gameState: GameState;
-}): { ingredients: number[]; total: number } => {
-    let total = 0;
-    const ingredients = [0, 0, 0, 0];
-
-    gameState.availableBrewActionIds.forEach(actionId => {
-        apac.state[actionId].deltas.forEach((delta, index) => {
-            total += delta;
-            ingredients[index] += delta;
+    learnedCastActionIds.forEach(castId => {
+        apac.state[castId].deltas.forEach((delta, index) => {
+            totalProduction += delta * INGREDIENT_VALUES[index] * weights[index];
         });
     });
 
-    return { ingredients, total };
+    return totalProduction / learnedCastActionIds.length;
 };
-*/
 
-const scoreUnusedIngredients = ({
+const scoreUnusedIngredientsForPlayer = ({
     gameState,
     playerId,
 }: {
@@ -123,17 +66,38 @@ export const scoreGameState = ({
     }
 
     const ingredientScores = playerIds.map(playerId => {
-        return scoreUnusedIngredients({ gameState: currentState, playerId });
+        return scoreUnusedIngredientsForPlayer({ gameState: currentState, playerId });
+    });
+    const averageProductionsPerTurn = playerIds.map(playerId => {
+        return getAverageProductionPerTurn({
+            initialState,
+            currentState,
+            playerId,
+        });
     });
 
-    const spellScores = playerIds.map(playerId => {
-        return scoreLearnedSpells({ initialState, currentState, playerId });
+    const numOfExpectedTurnsToFinish = Math.min(
+        ...playerIds.map((playerId, index) => {
+            const ingredientScore = ingredientScores[index];
+            const averageProductionPerTurn = averageProductionsPerTurn[index];
+            const potionsLeftToBrew =
+                gameConfig.numOfPotionsToBrewToWin -
+                currentState.players[playerId].numOfPotionsBrewed;
+
+            let scoreLeftToCollect = potionsLeftToBrew * 17 - ingredientScore;
+            scoreLeftToCollect = scoreLeftToCollect < 0 ? 0 : scoreLeftToCollect;
+            return scoreLeftToCollect / averageProductionPerTurn;
+        })
+    );
+
+    const expectedScores = playerIds.map((playerId, index) => {
+        return (
+            brewScores[index] +
+            ingredientScores[index] +
+            averageProductionsPerTurn[index] * numOfExpectedTurnsToFinish
+        );
     });
 
-    const playerScores = [
-        brewScores[0] + ingredientScores[0] + spellScores[0],
-        brewScores[1] + ingredientScores[1] + spellScores[1],
-    ];
-    const totalScore = playerScores[0] + playerScores[1];
-    return [playerScores[0] / totalScore, playerScores[1] / totalScore];
+    const totalScore = expectedScores[0] + expectedScores[1];
+    return [expectedScores[0] / totalScore, expectedScores[1] / totalScore];
 };

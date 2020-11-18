@@ -1,5 +1,5 @@
 import gameConfig, { NUM_OF_GAME_ROUNDS, PLAYER_ID_ME, PLAYER_ID_OPPONENT } from '../game-config';
-import { ActionType, GameState, PlayerActionConfig } from '../shared';
+import { GameState } from '../shared';
 import {
     getValidPlayerActionIdPairsForTurn,
     applyPlayerActionIdsToGameState,
@@ -16,31 +16,22 @@ import {
     GameStateGetter,
 } from './simultaneous-monte-carlo-efficient';
 
-const isSpellNetGenerator = ({ learnAction }: { learnAction: PlayerActionConfig }): boolean => {
-    for (let i = 0, iMax = learnAction.deltas.length; i < iMax; i++) {
-        if (learnAction.deltas[i] < 0) {
-            return false;
-        }
-    }
-    return true;
-};
-
-const getPlayerProductions = ({
+export const getPlayerProductions = ({
     gameState,
     playerId,
 }: {
     gameState: GameState;
     playerId: string;
 }): number[] => {
-    const economy = [0, 0, 0, 0];
+    const productions = [0, 0, 0, 0];
 
     gameState.players[playerId].learnedCastActionIds.forEach(castId => {
         apac.state[castId].deltas.forEach((delta, index) => {
-            economy[index] += delta;
+            productions[index] += delta;
         });
     });
 
-    return economy;
+    return productions;
 };
 
 const isSpellWorthLearning = ({
@@ -51,11 +42,11 @@ const isSpellWorthLearning = ({
     productions: number[];
 }): boolean => {
     const learnAction = apac.state[learnId];
-
+    /*
     if (isSpellNetGenerator({ learnAction })) {
         return true;
     }
-
+    */
     if (learnAction.taxCount >= 4) {
         return true;
     }
@@ -76,7 +67,7 @@ const isSpellWorthLearning = ({
 
     const deviation = positiveDeviation - negativeDeviation;
 
-    return deviation <= 6;
+    return deviation <= 5;
 };
 
 const filterSpellsWorthLearning = ({
@@ -86,12 +77,9 @@ const filterSpellsWorthLearning = ({
     gameState: GameState;
     playerId: string;
 }): number[] => {
-    if (9 <= gameState.players[playerId].learnedCastActionIds.length) {
-        return [];
-    }
     const productions = getPlayerProductions({ gameState, playerId });
     return gameState.avaliableLearnActionIds.filter(learnId => {
-        return isSpellWorthLearning({ learnId, productions });
+        return isSpellWorthLearning({ learnId, productions: [...productions] });
     });
 };
 
@@ -120,16 +108,25 @@ class Agent {
     pruneGameState({ gameState }: { gameState: GameState }): GameState {
         const clonedGameState = this.cloneGameState({ gameState });
 
-        const spellsWorthLearning = filterSpellsWorthLearning({
-            gameState,
-            playerId: PLAYER_ID_ME,
-        });
-
         clonedGameState.availableBrewActionIds =
             7 <= gameState.roundId ? gameState.availableBrewActionIds : [];
 
-        clonedGameState.avaliableLearnActionIds = spellsWorthLearning;
+        clonedGameState.players[PLAYER_ID_ME].interestedInCastActionIds = filterSpellsWorthLearning(
+            {
+                gameState,
+                playerId: PLAYER_ID_ME,
+            }
+        );
 
+        clonedGameState.players[
+            PLAYER_ID_OPPONENT
+        ].interestedInCastActionIds = filterSpellsWorthLearning({
+            gameState,
+            playerId: PLAYER_ID_OPPONENT,
+        });
+
+        console.error(clonedGameState.players[PLAYER_ID_ME].interestedInCastActionIds);
+        console.error(clonedGameState.players[PLAYER_ID_OPPONENT].interestedInCastActionIds);
         /*
         const allowedActions =
             clonedGameState.players[0].learnedCastActionIds.length <= 9 && gameState.roundId < 13
@@ -162,14 +159,14 @@ class Agent {
     getValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<GameState> = ({ gameState }) => {
         const a = [
             ...gameState.availableBrewActionIds,
-            ...gameState.avaliableLearnActionIds,
+            ...gameState.players[PLAYER_ID_ME].interestedInCastActionIds,
             ...gameState.players[PLAYER_ID_ME].availableCastActionIds,
             ...gameState.availableDefaultActionIds,
         ];
 
         const b = [
             ...gameState.availableBrewActionIds,
-            ...gameState.avaliableLearnActionIds,
+            ...gameState.players[PLAYER_ID_OPPONENT].interestedInCastActionIds,
             ...gameState.players[PLAYER_ID_OPPONENT].availableCastActionIds,
             ...gameState.availableDefaultActionIds,
         ];

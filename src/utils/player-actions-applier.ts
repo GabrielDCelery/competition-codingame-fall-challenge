@@ -47,8 +47,12 @@ const applyLearnPlayerActionToGameState = ({
         ...gameState.players[playerId].learnedCastActionIds,
         playerAction.id,
     ];
+    gameState.players[playerId].availableCastActionIds = [
+        ...gameState.players[playerId].availableCastActionIds,
+        playerAction.id,
+    ];
     gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
-    gameState.players[playerId].newlyLearnedSpellIds.push(playerAction.id);
+    gameState.players[playerId].availableCastActionIdsMap[playerAction.id] = true;
 };
 
 const applyCastPlayerActionToGameState = ({
@@ -63,7 +67,7 @@ const applyCastPlayerActionToGameState = ({
     gameState.players[playerId].ingredients = playerAction.deltas.map((delta, index) => {
         return gameState.players[playerId].ingredients[index] + delta;
     });
-    gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
+    gameState.players[playerId].availableCastActionIdsMap[playerAction.id] = false;
 };
 /*
 const applyWaitPlayerActionToGameState = ({}: {

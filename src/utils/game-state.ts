@@ -24,8 +24,8 @@ export const createInitialGameState = (): GameState => {
                 },
                 learnedCastActionIds: [],
                 availableCastActionIds: [],
+                interestedInCastActionIds: [],
                 availableCastActionIdsMap: {},
-                newlyLearnedSpellIds: [],
             },
             [PLAYER_ID_OPPONENT]: {
                 numOfPotionsBrewed: 0,
@@ -37,8 +37,8 @@ export const createInitialGameState = (): GameState => {
                 },
                 learnedCastActionIds: [],
                 availableCastActionIds: [],
+                interestedInCastActionIds: [],
                 availableCastActionIdsMap: {},
-                newlyLearnedSpellIds: [],
             },
         },
         availableBrewActionIds: [],
@@ -92,8 +92,8 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
                 },
                 learnedCastActionIds: [],
                 availableCastActionIds: [],
+                interestedInCastActionIds: [],
                 availableCastActionIdsMap: {},
-                newlyLearnedSpellIds: [],
             },
             [PLAYER_ID_OPPONENT]: {
                 numOfPotionsBrewed: oldGameState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed,
@@ -105,8 +105,8 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
                 },
                 learnedCastActionIds: [],
                 availableCastActionIds: [],
+                interestedInCastActionIds: [],
                 availableCastActionIdsMap: {},
-                newlyLearnedSpellIds: [],
             },
         },
         availableBrewActionIds: [],
@@ -224,8 +224,8 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
             },
             learnedCastActionIds: [...player.learnedCastActionIds],
             availableCastActionIds: [...player.availableCastActionIds],
+            interestedInCastActionIds: [...player.interestedInCastActionIds],
             availableCastActionIdsMap: { ...player.availableCastActionIdsMap },
-            newlyLearnedSpellIds: [...player.newlyLearnedSpellIds],
         };
     });
 

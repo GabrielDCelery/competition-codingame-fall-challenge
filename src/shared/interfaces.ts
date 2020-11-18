@@ -10,8 +10,8 @@ export interface PlayerState {
     };
     learnedCastActionIds: number[];
     availableCastActionIds: number[];
+    interestedInCastActionIds: number[];
     availableCastActionIdsMap: { [index: string]: boolean };
-    newlyLearnedSpellIds: number[];
 }
 
 export interface PlayerActionConfig {
