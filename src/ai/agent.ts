@@ -33,7 +33,7 @@ class Agent {
     }
 
     getGameState: GameStateGetter<GameState> = () => {
-        console.error(JSON.stringify(this.gameState));
+        // console.error(JSON.stringify(this.gameState));
         return this.gameState;
     };
 

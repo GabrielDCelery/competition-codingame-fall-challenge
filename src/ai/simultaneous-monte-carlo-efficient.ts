@@ -273,9 +273,17 @@ class SimultaneousMCSearchSimulator<TState> {
     }
 
     run(): number {
-        let numOfCurrentIterations = 0;
         const start = new Date().getTime();
+        let numOfCurrentIterations = 0;
         let playerRunningTheSimulation = 0;
+
+        this.rootNode = {
+            visitCount: 0,
+            playerActionIds: null,
+            valueSums: [0, 0],
+            chosenChildIndex: null,
+            children: [],
+        };
 
         const gameState = this.getGameState();
 

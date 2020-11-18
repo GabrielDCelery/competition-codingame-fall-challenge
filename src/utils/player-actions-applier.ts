@@ -84,6 +84,7 @@ export const applyPlayerActionToGameState = ({
     playerId: string;
 }): void => {
     const playerAction = apac.state[playerActionId];
+
     switch (playerAction.type) {
         case ActionType.CAST: {
             return applyCastPlayerActionToGameState({
