@@ -4,6 +4,10 @@ export interface PlayerState {
     numOfPotionsBrewed: number;
     ingredients: number[];
     score: number;
+    spellDistribution: {
+        consumer: number[];
+        generator: number[];
+    };
     learnedCastActionIds: number[];
     availableCastActionIds: number[];
     availableCastActionIdsMap: { [index: string]: boolean };

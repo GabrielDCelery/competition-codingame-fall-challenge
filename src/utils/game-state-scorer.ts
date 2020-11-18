@@ -28,7 +28,10 @@ const getSpellValue = ({
     });
 
     totalValueGenerated =
-        totalValueGenerated - learnAction.tomeIndex * 0.2 + learnAction.taxCount * 0.55;
+        totalValueGenerated -
+        learnAction.tomeIndex * 0.2 +
+        learnAction.taxCount *
+            gameConfig.agentStrategy[playerId].scoring.unusedIngredientScoreWeights[0];
     return totalValueGenerated < 0 ? 0 : totalValueGenerated;
 };
 
@@ -87,13 +90,12 @@ const scoreUnusedIngredients = ({
     const ingredients = gameState.players[playerId].ingredients;
     const weights = gameConfig.agentStrategy[playerId].scoring.unusedIngredientScoreWeights;
 
-    const totalScore =
+    return (
         ingredients[0] * INGREDIENT_VALUES[0] * weights[0] +
         ingredients[1] * INGREDIENT_VALUES[1] * weights[1] +
         ingredients[2] * INGREDIENT_VALUES[2] * weights[2] +
-        ingredients[3] * INGREDIENT_VALUES[3] * weights[3];
-
-    return totalScore;
+        ingredients[3] * INGREDIENT_VALUES[3] * weights[3]
+    );
 };
 
 export const scoreGameState = ({
