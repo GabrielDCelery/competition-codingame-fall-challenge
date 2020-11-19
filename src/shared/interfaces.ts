@@ -4,9 +4,12 @@ export interface PlayerState {
     numOfPotionsBrewed: number;
     ingredients: number[];
     score: number;
-    spellDistribution: {
-        consumer: number[];
-        generator: number[];
+    action: {
+        list: {
+            cast: {
+                learned: number[];
+            };
+        };
     };
     learnedCastActionIds: number[];
     availableCastActionIds: number[];

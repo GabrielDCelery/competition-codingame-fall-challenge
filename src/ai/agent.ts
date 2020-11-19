@@ -47,7 +47,7 @@ const isSpellWorthLearning = ({
         return true;
     }
     */
-    if (learnAction.taxCount >= 4) {
+    if (learnAction.taxCount >= 3) {
         return true;
     }
 
