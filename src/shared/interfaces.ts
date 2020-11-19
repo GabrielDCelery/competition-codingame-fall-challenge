@@ -8,12 +8,11 @@ export interface PlayerState {
         list: {
             cast: {
                 learned: number[];
+                available: number[];
+                interestedIn: number[];
             };
         };
     };
-    learnedCastActionIds: number[];
-    availableCastActionIds: number[];
-    interestedInCastActionIds: number[];
     availableCastActionIdsMap: { [index: string]: boolean };
 }
 

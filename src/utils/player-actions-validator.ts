@@ -31,8 +31,8 @@ const isRestPlayerActionValid = ({
     playerId: string;
 }): boolean => {
     return (
-        gameState.players[playerId].availableCastActionIds.length !==
-        gameState.players[playerId].learnedCastActionIds.length
+        gameState.players[playerId].action.list.cast.available.length !==
+        gameState.players[playerId].action.list.cast.learned.length
     );
 };
 
@@ -136,78 +136,7 @@ const isPlayerActionValid = ({
             throw new Error(`Invalid action type -> ${playerAction.type}`);
     }
 };
-/*
-const getValidActionsForPlayer = ({
-    gameState,
-    playerId,
-    allowedActions,
-}: {
-    gameState: GameState;
-    playerId: string;
-    allowedActions: ActionType[];
-}): number[] => {
-    const validActionIds: number[] = [
-        ...(allowedActions.includes(ActionType.BREW) ? gameState.availableBrewActionIds : []),
-        ...(allowedActions.includes(ActionType.LEARN) ? gameState.avaliableLearnActionIds : []),
-        ...(allowedActions.includes(ActionType.CAST)
-            ? gameState.players[playerId].availableCastActionIds
-            : []),
-        ...gameState.availableDefaultActionIds,
-    ].filter(playerActionId => {
-        return isPlayerActionValid({
-            gameState,
-            playerActionId,
-            playerId,
-        });
-    });
 
-    return validActionIds.length === 0 ? gameState.availableDefaultActionIds : validActionIds;
-};
-
-const getActionPoolForPlayer = ({
-    gameState,
-    playerId,
-    allowedActions,
-}: {
-    gameState: GameState;
-    playerId: string;
-    allowedActions: ActionType[];
-}): number[] => {
-    return [
-        ...(allowedActions.includes(ActionType.BREW) ? gameState.availableBrewActionIds : []),
-        ...(allowedActions.includes(ActionType.LEARN) ? gameState.avaliableLearnActionIds : []),
-        ...(allowedActions.includes(ActionType.CAST)
-            ? gameState.players[playerId].availableCastActionIds
-            : []),
-        ...gameState.availableDefaultActionIds,
-    ];
-};
-
-const pushActionPairIfValid = ({
-    playerIdPair,
-    gameState,
-    validPlayerActionPairsForTurn,
-}: {
-    playerIdPair: number[];
-    gameState: GameState;
-    validPlayerActionPairsForTurn: number[][];
-}): void => {
-    if (
-        isPlayerActionValid({
-            gameState,
-            playerActionId: playerIdPair[0],
-            playerId: PLAYER_ID_ME,
-        }) &&
-        isPlayerActionValid({
-            gameState,
-            playerActionId: playerIdPair[1],
-            playerId: PLAYER_ID_OPPONENT,
-        })
-    ) {
-        validPlayerActionPairsForTurn.push(playerIdPair);
-    }
-};
-*/
 export const getValidPlayerActionIdPairsForTurn = ({
     gameState,
     actionPoolPair,

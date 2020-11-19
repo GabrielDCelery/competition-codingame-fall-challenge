@@ -18,18 +18,14 @@ export const createInitialGameState = (): GameState => {
                 numOfPotionsBrewed: 0,
                 ingredients: [0, 0, 0, 0],
                 score: 0,
-                learnedCastActionIds: [],
-                availableCastActionIds: [],
-                interestedInCastActionIds: [],
+                action: { list: { cast: { learned: [], available: [], interestedIn: [] } } },
                 availableCastActionIdsMap: {},
             },
             [PLAYER_ID_OPPONENT]: {
                 numOfPotionsBrewed: 0,
                 ingredients: [0, 0, 0, 0],
                 score: 0,
-                learnedCastActionIds: [],
-                availableCastActionIds: [],
-                interestedInCastActionIds: [],
+                action: { list: { cast: { learned: [], available: [], interestedIn: [] } } },
                 availableCastActionIdsMap: {},
             },
         },
@@ -78,18 +74,14 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
                 numOfPotionsBrewed: oldGameState.players[PLAYER_ID_ME].numOfPotionsBrewed,
                 ingredients: [],
                 score: 0,
-                learnedCastActionIds: [],
-                availableCastActionIds: [],
-                interestedInCastActionIds: [],
+                action: { list: { cast: { learned: [], available: [], interestedIn: [] } } },
                 availableCastActionIdsMap: {},
             },
             [PLAYER_ID_OPPONENT]: {
                 numOfPotionsBrewed: oldGameState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed,
                 ingredients: [],
                 score: 0,
-                learnedCastActionIds: [],
-                availableCastActionIds: [],
-                interestedInCastActionIds: [],
+                action: { list: { cast: { learned: [], available: [], interestedIn: [] } } },
                 availableCastActionIdsMap: {},
             },
         },
@@ -144,17 +136,17 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
             continue;
         }
         if (type == ActionType.CAST) {
-            newGameState.players[PLAYER_ID_ME].learnedCastActionIds.push(id);
+            newGameState.players[PLAYER_ID_ME].action.list.cast.learned.push(id);
             if (castable) {
-                newGameState.players[PLAYER_ID_ME].availableCastActionIds.push(id);
+                newGameState.players[PLAYER_ID_ME].action.list.cast.available.push(id);
                 newGameState.players[PLAYER_ID_ME].availableCastActionIdsMap[id] = true;
             }
             continue;
         }
         if (type == ActionType.OPPONENT_CAST) {
-            newGameState.players[PLAYER_ID_OPPONENT].learnedCastActionIds.push(id);
+            newGameState.players[PLAYER_ID_OPPONENT].action.list.cast.learned.push(id);
             if (castable) {
-                newGameState.players[PLAYER_ID_OPPONENT].availableCastActionIds.push(id);
+                newGameState.players[PLAYER_ID_OPPONENT].action.list.cast.available.push(id);
                 newGameState.players[PLAYER_ID_OPPONENT].availableCastActionIdsMap[id] = true;
             }
             continue;
@@ -202,9 +194,15 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
             numOfPotionsBrewed: player.numOfPotionsBrewed,
             ingredients: [...player.ingredients],
             score: player.score,
-            learnedCastActionIds: [...player.learnedCastActionIds],
-            availableCastActionIds: [...player.availableCastActionIds],
-            interestedInCastActionIds: [...player.interestedInCastActionIds],
+            action: {
+                list: {
+                    cast: {
+                        learned: [...player.action.list.cast.learned],
+                        available: [...player.action.list.cast.available],
+                        interestedIn: [...player.action.list.cast.interestedIn],
+                    },
+                },
+            },
             availableCastActionIdsMap: { ...player.availableCastActionIdsMap },
         };
     });

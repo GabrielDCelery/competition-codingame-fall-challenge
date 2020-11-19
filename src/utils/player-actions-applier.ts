@@ -28,8 +28,8 @@ const applyRestPlayerActionToGameState = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): void => {
-    gameState.players[playerId].availableCastActionIds = [
-        ...gameState.players[playerId].learnedCastActionIds,
+    gameState.players[playerId].action.list.cast.available = [
+        ...gameState.players[playerId].action.list.cast.learned,
     ];
 };
 
@@ -43,12 +43,12 @@ const applyLearnPlayerActionToGameState = ({
     playerId: string;
 }): void => {
     gameState.players[playerId].ingredients[0] -= playerAction.tomeIndex;
-    gameState.players[playerId].learnedCastActionIds = [
-        ...gameState.players[playerId].learnedCastActionIds,
+    gameState.players[playerId].action.list.cast.learned = [
+        ...gameState.players[playerId].action.list.cast.learned,
         playerAction.id,
     ];
-    gameState.players[playerId].availableCastActionIds = [
-        ...gameState.players[playerId].availableCastActionIds,
+    gameState.players[playerId].action.list.cast.available = [
+        ...gameState.players[playerId].action.list.cast.available,
         playerAction.id,
     ];
     gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
