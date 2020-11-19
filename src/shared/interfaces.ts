@@ -12,8 +12,12 @@ export interface PlayerState {
                 interestedIn: number[];
             };
         };
+        map: {
+            cast: {
+                available: { [index: string]: boolean };
+            };
+        };
     };
-    availableCastActionIdsMap: { [index: string]: boolean };
 }
 
 export interface PlayerActionConfig {

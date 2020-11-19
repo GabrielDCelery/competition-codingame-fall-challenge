@@ -52,7 +52,7 @@ const applyLearnPlayerActionToGameState = ({
         playerAction.id,
     ];
     gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
-    gameState.players[playerId].availableCastActionIdsMap[playerAction.id] = true;
+    gameState.players[playerId].action.map.cast.available[playerAction.id] = true;
 };
 
 const applyCastPlayerActionToGameState = ({
@@ -67,7 +67,7 @@ const applyCastPlayerActionToGameState = ({
     gameState.players[playerId].ingredients = playerAction.deltas.map((delta, index) => {
         return gameState.players[playerId].ingredients[index] + delta;
     });
-    gameState.players[playerId].availableCastActionIdsMap[playerAction.id] = false;
+    gameState.players[playerId].action.map.cast.available[playerAction.id] = false;
 };
 /*
 const applyWaitPlayerActionToGameState = ({}: {

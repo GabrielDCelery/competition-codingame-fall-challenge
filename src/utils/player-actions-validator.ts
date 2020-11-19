@@ -45,7 +45,7 @@ const isCastPlayerActionValid = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): boolean => {
-    if (gameState.players[playerId].availableCastActionIdsMap[playerAction.id] !== true) {
+    if (gameState.players[playerId].action.map.cast.available[playerAction.id] !== true) {
         return false;
     }
 
