@@ -4,14 +4,20 @@ export interface PlayerState {
     numOfPotionsBrewed: number;
     ingredients: number[];
     score: number;
-    spellDistribution: {
-        consumer: number[];
-        generator: number[];
+    action: {
+        list: {
+            cast: {
+                learned: number[];
+                available: number[];
+                interestedIn: number[];
+            };
+        };
+        map: {
+            cast: {
+                available: { [index: string]: boolean };
+            };
+        };
     };
-    learnedCastActionIds: number[];
-    availableCastActionIds: number[];
-    interestedInCastActionIds: number[];
-    availableCastActionIdsMap: { [index: string]: boolean };
 }
 
 export interface PlayerActionConfig {

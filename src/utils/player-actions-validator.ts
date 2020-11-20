@@ -31,8 +31,8 @@ const isRestPlayerActionValid = ({
     playerId: string;
 }): boolean => {
     return (
-        gameState.players[playerId].availableCastActionIds.length !==
-        gameState.players[playerId].learnedCastActionIds.length
+        gameState.players[playerId].action.list.cast.available.length !==
+        gameState.players[playerId].action.list.cast.learned.length
     );
 };
 
@@ -45,7 +45,7 @@ const isCastPlayerActionValid = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): boolean => {
-    if (gameState.players[playerId].availableCastActionIdsMap[playerAction.id] !== true) {
+    if (gameState.players[playerId].action.map.cast.available[playerAction.id] !== true) {
         return false;
     }
 

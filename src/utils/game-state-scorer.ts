@@ -11,7 +11,7 @@ const getAverageProductionPerTurn = ({
     playerId: string;
 }): number => {
     let totalProduction = 0;
-    const learnedCastActionIds = currentState.players[playerId].learnedCastActionIds;
+    const learnedCastActionIds = currentState.players[playerId].action.list.cast.learned;
     const weights = gameConfig.agentStrategy[playerId].scoring.unusedIngredientScoreWeights;
 
     learnedCastActionIds.forEach(castId => {

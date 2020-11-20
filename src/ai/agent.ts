@@ -25,7 +25,7 @@ export const getPlayerProductions = ({
 }): number[] => {
     const productions = [0, 0, 0, 0];
 
-    gameState.players[playerId].learnedCastActionIds.forEach(castId => {
+    gameState.players[playerId].action.list.cast.learned.forEach(castId => {
         apac.state[castId].deltas.forEach((delta, index) => {
             productions[index] += delta;
         });
@@ -47,7 +47,7 @@ const isSpellWorthLearning = ({
         return true;
     }
     */
-    if (learnAction.taxCount >= 4) {
+    if (learnAction.taxCount >= 3) {
         return true;
     }
 
@@ -111,90 +111,38 @@ class Agent {
         clonedGameState.availableBrewActionIds =
             7 <= gameState.roundId ? gameState.availableBrewActionIds : [];
 
-        clonedGameState.players[PLAYER_ID_ME].interestedInCastActionIds = filterSpellsWorthLearning(
-            {
-                gameState,
-                playerId: PLAYER_ID_ME,
-            }
-        );
+        clonedGameState.players[
+            PLAYER_ID_ME
+        ].action.list.cast.interestedIn = filterSpellsWorthLearning({
+            gameState,
+            playerId: PLAYER_ID_ME,
+        });
 
         clonedGameState.players[
             PLAYER_ID_OPPONENT
-        ].interestedInCastActionIds = filterSpellsWorthLearning({
+        ].action.list.cast.interestedIn = filterSpellsWorthLearning({
             gameState,
             playerId: PLAYER_ID_OPPONENT,
         });
 
-        console.error(clonedGameState.players[PLAYER_ID_ME].interestedInCastActionIds);
-        console.error(clonedGameState.players[PLAYER_ID_OPPONENT].interestedInCastActionIds);
-        /*
-        const allowedActions =
-            clonedGameState.players[0].learnedCastActionIds.length <= 9 && gameState.roundId < 13
-                ? [ActionType.LEARN, ActionType.CAST, ActionType.REST]
-                : [ActionType.BREW, ActionType.CAST, ActionType.REST];
-
-        clonedGameState.availableBrewActionIds = allowedActions.includes(ActionType.BREW)
-            ? gameState.availableBrewActionIds
-            : [];
-
-        clonedGameState.avaliableLearnActionIds = allowedActions.includes(ActionType.LEARN)
-            ? gameState.avaliableLearnActionIds
-            : [];
-
-        clonedGameState.players[PLAYER_ID_ME].availableCastActionIds = allowedActions.includes(
-            ActionType.CAST
-        )
-            ? gameState.players[PLAYER_ID_ME].availableCastActionIds
-            : [];
-
-        clonedGameState.players[
-            PLAYER_ID_OPPONENT
-        ].availableCastActionIds = allowedActions.includes(ActionType.CAST)
-            ? gameState.players[PLAYER_ID_OPPONENT].availableCastActionIds
-            : [];
-*/
         return clonedGameState;
     }
 
     getValidPlayerActionIdPairs: ValidPlayerActionIdPairsGetter<GameState> = ({ gameState }) => {
         const a = [
             ...gameState.availableBrewActionIds,
-            ...gameState.players[PLAYER_ID_ME].interestedInCastActionIds,
-            ...gameState.players[PLAYER_ID_ME].availableCastActionIds,
+            ...gameState.players[PLAYER_ID_ME].action.list.cast.interestedIn,
+            ...gameState.players[PLAYER_ID_ME].action.list.cast.available,
             ...gameState.availableDefaultActionIds,
         ];
 
         const b = [
             ...gameState.availableBrewActionIds,
-            ...gameState.players[PLAYER_ID_OPPONENT].interestedInCastActionIds,
-            ...gameState.players[PLAYER_ID_OPPONENT].availableCastActionIds,
+            ...gameState.players[PLAYER_ID_OPPONENT].action.list.cast.interestedIn,
+            ...gameState.players[PLAYER_ID_OPPONENT].action.list.cast.available,
             ...gameState.availableDefaultActionIds,
         ];
 
-        /*
-        const allowedActions =
-            gameState.players[0].learnedCastActionIds.length <= 9 && gameState.roundId < 13
-                ? [ActionType.LEARN, ActionType.CAST, ActionType.REST]
-                : [ActionType.BREW, ActionType.CAST, ActionType.REST];
-
-        const a = [
-            ...(allowedActions.includes(ActionType.BREW) ? gameState.availableBrewActionIds : []),
-            ...(allowedActions.includes(ActionType.LEARN) ? gameState.avaliableLearnActionIds : []),
-            ...(allowedActions.includes(ActionType.CAST)
-                ? gameState.players[PLAYER_ID_ME].availableCastActionIds
-                : []),
-            ...gameState.availableDefaultActionIds,
-        ];
-
-        const b = [
-            ...(allowedActions.includes(ActionType.BREW) ? gameState.availableBrewActionIds : []),
-            ...(allowedActions.includes(ActionType.LEARN) ? gameState.avaliableLearnActionIds : []),
-            ...(allowedActions.includes(ActionType.CAST)
-                ? gameState.players[PLAYER_ID_OPPONENT].availableCastActionIds
-                : []),
-            ...gameState.availableDefaultActionIds,
-        ];
-        */
         return getValidPlayerActionIdPairsForTurn({ gameState, actionPoolPair: [a, b] });
     };
 

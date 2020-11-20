@@ -28,8 +28,8 @@ const applyRestPlayerActionToGameState = ({
     playerAction: PlayerActionConfig;
     playerId: string;
 }): void => {
-    gameState.players[playerId].availableCastActionIds = [
-        ...gameState.players[playerId].learnedCastActionIds,
+    gameState.players[playerId].action.list.cast.available = [
+        ...gameState.players[playerId].action.list.cast.learned,
     ];
 };
 
@@ -43,16 +43,16 @@ const applyLearnPlayerActionToGameState = ({
     playerId: string;
 }): void => {
     gameState.players[playerId].ingredients[0] -= playerAction.tomeIndex;
-    gameState.players[playerId].learnedCastActionIds = [
-        ...gameState.players[playerId].learnedCastActionIds,
+    gameState.players[playerId].action.list.cast.learned = [
+        ...gameState.players[playerId].action.list.cast.learned,
         playerAction.id,
     ];
-    gameState.players[playerId].availableCastActionIds = [
-        ...gameState.players[playerId].availableCastActionIds,
+    gameState.players[playerId].action.list.cast.available = [
+        ...gameState.players[playerId].action.list.cast.available,
         playerAction.id,
     ];
     gameState.avaliableLearnActionIdsMap[playerAction.id] = false;
-    gameState.players[playerId].availableCastActionIdsMap[playerAction.id] = true;
+    gameState.players[playerId].action.map.cast.available[playerAction.id] = true;
 };
 
 const applyCastPlayerActionToGameState = ({
@@ -67,7 +67,7 @@ const applyCastPlayerActionToGameState = ({
     gameState.players[playerId].ingredients = playerAction.deltas.map((delta, index) => {
         return gameState.players[playerId].ingredients[index] + delta;
     });
-    gameState.players[playerId].availableCastActionIdsMap[playerAction.id] = false;
+    gameState.players[playerId].action.map.cast.available[playerAction.id] = false;
 };
 /*
 const applyWaitPlayerActionToGameState = ({}: {

@@ -18,27 +18,19 @@ export const createInitialGameState = (): GameState => {
                 numOfPotionsBrewed: 0,
                 ingredients: [0, 0, 0, 0],
                 score: 0,
-                spellDistribution: {
-                    consumer: [0, 0, 0, 0],
-                    generator: [0, 0, 0, 0],
+                action: {
+                    list: { cast: { learned: [], available: [], interestedIn: [] } },
+                    map: { cast: { available: {} } },
                 },
-                learnedCastActionIds: [],
-                availableCastActionIds: [],
-                interestedInCastActionIds: [],
-                availableCastActionIdsMap: {},
             },
             [PLAYER_ID_OPPONENT]: {
                 numOfPotionsBrewed: 0,
                 ingredients: [0, 0, 0, 0],
                 score: 0,
-                spellDistribution: {
-                    consumer: [0, 0, 0, 0],
-                    generator: [0, 0, 0, 0],
+                action: {
+                    list: { cast: { learned: [], available: [], interestedIn: [] } },
+                    map: { cast: { available: {} } },
                 },
-                learnedCastActionIds: [],
-                availableCastActionIds: [],
-                interestedInCastActionIds: [],
-                availableCastActionIdsMap: {},
             },
         },
         availableBrewActionIds: [],
@@ -86,27 +78,19 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
                 numOfPotionsBrewed: oldGameState.players[PLAYER_ID_ME].numOfPotionsBrewed,
                 ingredients: [],
                 score: 0,
-                spellDistribution: {
-                    consumer: [0, 0, 0, 0],
-                    generator: [0, 0, 0, 0],
+                action: {
+                    list: { cast: { learned: [], available: [], interestedIn: [] } },
+                    map: { cast: { available: {} } },
                 },
-                learnedCastActionIds: [],
-                availableCastActionIds: [],
-                interestedInCastActionIds: [],
-                availableCastActionIdsMap: {},
             },
             [PLAYER_ID_OPPONENT]: {
                 numOfPotionsBrewed: oldGameState.players[PLAYER_ID_OPPONENT].numOfPotionsBrewed,
                 ingredients: [],
                 score: 0,
-                spellDistribution: {
-                    consumer: [0, 0, 0, 0],
-                    generator: [0, 0, 0, 0],
+                action: {
+                    list: { cast: { learned: [], available: [], interestedIn: [] } },
+                    map: { cast: { available: {} } },
                 },
-                learnedCastActionIds: [],
-                availableCastActionIds: [],
-                interestedInCastActionIds: [],
-                availableCastActionIdsMap: {},
             },
         },
         availableBrewActionIds: [],
@@ -160,18 +144,18 @@ export const updateGameStateFromGameLoop = (oldGameState: GameState): GameState 
             continue;
         }
         if (type == ActionType.CAST) {
-            newGameState.players[PLAYER_ID_ME].learnedCastActionIds.push(id);
+            newGameState.players[PLAYER_ID_ME].action.list.cast.learned.push(id);
             if (castable) {
-                newGameState.players[PLAYER_ID_ME].availableCastActionIds.push(id);
-                newGameState.players[PLAYER_ID_ME].availableCastActionIdsMap[id] = true;
+                newGameState.players[PLAYER_ID_ME].action.list.cast.available.push(id);
+                newGameState.players[PLAYER_ID_ME].action.map.cast.available[id] = true;
             }
             continue;
         }
         if (type == ActionType.OPPONENT_CAST) {
-            newGameState.players[PLAYER_ID_OPPONENT].learnedCastActionIds.push(id);
+            newGameState.players[PLAYER_ID_OPPONENT].action.list.cast.learned.push(id);
             if (castable) {
-                newGameState.players[PLAYER_ID_OPPONENT].availableCastActionIds.push(id);
-                newGameState.players[PLAYER_ID_OPPONENT].availableCastActionIdsMap[id] = true;
+                newGameState.players[PLAYER_ID_OPPONENT].action.list.cast.available.push(id);
+                newGameState.players[PLAYER_ID_OPPONENT].action.map.cast.available[id] = true;
             }
             continue;
         }
@@ -218,14 +202,20 @@ export const cloneGameState = ({ gameState }: { gameState: GameState }): GameSta
             numOfPotionsBrewed: player.numOfPotionsBrewed,
             ingredients: [...player.ingredients],
             score: player.score,
-            spellDistribution: {
-                consumer: [...player.spellDistribution.consumer],
-                generator: [...player.spellDistribution.generator],
+            action: {
+                list: {
+                    cast: {
+                        learned: [...player.action.list.cast.learned],
+                        available: [...player.action.list.cast.available],
+                        interestedIn: [...player.action.list.cast.interestedIn],
+                    },
+                },
+                map: {
+                    cast: {
+                        available: { ...player.action.map.cast.available },
+                    },
+                },
             },
-            learnedCastActionIds: [...player.learnedCastActionIds],
-            availableCastActionIds: [...player.availableCastActionIds],
-            interestedInCastActionIds: [...player.interestedInCastActionIds],
-            availableCastActionIdsMap: { ...player.availableCastActionIdsMap },
         };
     });
 
